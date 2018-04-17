@@ -18,37 +18,6 @@
 #include <errno.h>
 #include <configure_server.h>
 
-extern pthread_cond_t workerReleaser;  // for the thread that kills off
-extern pthread_mutex_t m_workerReleaser; 				       // zombie processes.
-extern pthread_t *releaserThread;      // thread that kills zombie processes.
-
-extern int connectfd;
-
-// SIGINT handler, releases mem and cancels second thread.
-void shutdownServer(int code) {
-	close(connectfd);
-	printf("\nshutting down server\n");
-	pthread_cancel(*releaserThread);
-	free(releaserThread);
-	exit(0);
-}
-
-void killZombies() {
-	int stat;
-	while (waitpid(-1, &stat, WNOHANG));
-	return;
-}
-
-// releaserThread waiting function. When signaled, executes releaseWorkers().
-void releaser(void* p) {
-	while( 1) {
-		pthread_mutex_lock(&m_workerReleaser);
-		pthread_cond_wait(&workerReleaser, &m_workerReleaser);
-		killZombies();
-		pthread_mutex_unlock(&m_workerReleaser);
-	}
-
-}
 
 // Forked process exectues this function, sends date/time to client then exits.
 void serveClient(int netfd) {
@@ -73,16 +42,16 @@ void setServerAddress(struct sockaddr_in* servAddr, int port) {
 // when name is configured, it needs to be binded to the socket.
 // listedfd -> socket fd
 // servAddr -> struct that containes address configs.
-void bindNameToSocket(int listenfd, struct sockaddr_in* servAddr) {
+int bindNameToSocket(int listenfd, struct sockaddr_in* servAddr) {
 	int on = 1;
 	// allow reuse of socket without waiting 3 min before using again.
 	if ( setsockopt( listenfd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on) ) < 0)
-		errx( 1, "error on sockopt: %s", strerror(errno));
+		return -1;
 	if ( bind( listenfd, /*assigns a name to an unnamed socket*/
 		(struct sockaddr *) servAddr, sizeof(*servAddr)) < 0) {
-			perror("bind");
-			exit(1);
+		return -1;
 	}
+	return 0;
 
 }
 
@@ -95,8 +64,7 @@ int get_port( int socketfd) {
 	memset(&childname, 0, sizeof(childname));
 
 	if ( getsockname(socketfd, &childname, &addrlen ) == -1) {
-		perror("Error on getsocketname");
-		exit(1);
+		return -1;
 	}
 
 	return ntohs(childname.sin_port);

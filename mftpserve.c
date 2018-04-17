@@ -17,9 +17,13 @@
 #include <signal.h>
 #include <err.h>
 #include <errno.h>
+#include <debug.h>
+#include <send_error.h>
+#include <data_connection.h>
 //TODO catch errors.
 
 #define PORT 49999
+#define CTRL_MSG_SIZE 512 //maximum size for a control command
 
 pthread_cond_t workerReleaser;  // for the thread that kills off
 pthread_mutex_t m_workerReleaser; 				       // zombie processes.
@@ -28,7 +32,45 @@ pthread_t *releaserThread;      // thread that kills zombie processes.
 int connectfd;
 
 extern void releaser(void*);
-extern void shutdownServer(int);
+
+void shutdownServer(int code) {
+	close(connectfd);
+	printf("\nshutting down server\n");
+	pthread_cancel(*releaserThread);
+	free(releaserThread);
+	exit(0);
+}
+
+
+void control_connection(int controlfd) {
+	DATACON datac;
+	while (true) {
+		char controlmesg[CTRL_MSG_SIZE], buffer[CTRL_MSG_SIZE];
+		char controlmesg[0] = "\0";
+		int bytes_read;
+		while ( ( bytes_read = read(controlfd, buffer, CTRL_MSG_SIZE) ) != 0) {
+			if ( ( strlen(controlmesg) + bytes_read ) >=  CTRL_MSG_SIZE ) {
+				send_error(controlfd, CUST, "Command to large for server buffer");
+			}
+			for ( int i = strlen(controlmesg), j = 0; j < bytes_read; i++, j++ ) {
+				if ( buffer[j] == '\n') {
+					controlmesg[i] = '\0';
+					break;
+				}
+				controlmesg[i] = buffer[j];
+			}
+		}
+		switch (controlmesg[0]) {
+			case 'D':
+				create_data_connection(&datac, controlfd);
+			default :
+		}
+	}
+}
+
+
+}
+
 
 int main () {
 	// cancel threads and release memory then exit, see shutdownServer.
@@ -82,7 +124,8 @@ int main () {
 		printf("accepted client [name: %s][ip: %s]\n", hostEntry->h_name, clientip);
 
 		// create new process to serve client.
-		if ( !( pid = fork() ) )  serveClient(connectfd);
+		if ( !( pid = fork() ) )  control_connection(connectfd);
+
 		// close fd so client will recieve EOF when child finishes.
 		close(connectfd);
 
