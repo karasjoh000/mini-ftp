@@ -16,7 +16,7 @@
 #include <signal.h>
 #include <err.h>
 #include <errno.h>
-#include <server.h>
+#include <configure_server.h>
 
 extern pthread_cond_t workerReleaser;  // for the thread that kills off
 extern pthread_mutex_t m_workerReleaser; 				       // zombie processes.

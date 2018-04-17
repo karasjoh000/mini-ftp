@@ -1,16 +1,10 @@
-SERVER=./mftp/server/
-CLIENT=./mftp/client/
-MFTPLIB=./mftp/
-ISERVERDIR=$(SERVER)include/
-ISERVER=-I$(SERVER)include/
-ICLIENTDIR=$(CLIENT)include/
-ICLIENT=-I$(CLIENT)
-CFLAGS=-c -std=c99 -Wall -pedantic
-mftpserve: mftpserve.o $(MFTPLIB)mftp.a
-	gcc -L$(MFTPLIB) mftpserve.o -o mftpserve -lserver
-mftpserve.o: mftpserve.c $(ISERVERDIR)server.h
-	gcc $(CFLAGS) mftpserve.c $(ISERVERDIR)
-$(MFTPLIB)mftp.a:
-	cd $(MFTPLIB) && make mftp.a
+SERVER=mftp_server
+CFLAGS=-c -std=c99 -Wall -pedantic -I$(SERVER)/include
+mftpserve: mftpserve.o configure_server.o
+	gcc  configure_server.o mftpserve.o -o mftpserve
+mftpserve.o: mftpserve.c
+	gcc $(CFLAGS) mftpserve.c
+configure_server.o: $(SERVER)/configure_server.c
+	gcc $(CFLAGS) $(SERVER)/configure_server.c
 clean:
-	rm *.o ./mftp/*.o
+	rm *.o $(SERVER)/*.o
