@@ -10,10 +10,8 @@
 #include <debug.h>
 
 void changedir(int fd, char* path) {
-	char buffer[70];
-	strcpy(buffer, "in change dir changing to: ");
-	strcat(buffer, path);
-	debugprint(buffer);
+	char buffer[20];
+	strcpy(buffer, "error\n");
 	debugprint("in change dir");
 	if (chdir(path) == -1) {
 		debugprint("error changing dir");

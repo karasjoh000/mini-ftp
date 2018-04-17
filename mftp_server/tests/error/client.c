@@ -72,7 +72,7 @@ int main (int argc, char** argv) {
 		       sizeof(servAddr)) == -1)
 		     errx( 1, "error connecting: %s", strerror(errno));
 
-	strcpy(buffer, "C..\n"); // This will cause error (this is for testing the send_error())
+	strcpy(buffer, "C./~\n"); // This will cause error (this is for testing the send_error())
 	write(socketfd, buffer, strlen(buffer));
 
 	if ( (charread = read(socketfd, buffer, 50) ) != 0) {

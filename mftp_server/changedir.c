@@ -9,10 +9,18 @@
 #include <send_error.h>
 
 
+
+sdfsdfsd
 void changedir(int fd, char* path) {
-	if (chdir(path) == -1) send_error(fd, ERRNO, NULL);
-	else { 
-		if ( write(fd, "A\n", 2) == -1 ) exit(0);
+	printf("in chandedir\n");
+	if (chdir(path) == -1) {
+		//send_error(fd, ERRNO, NULL);
+	}
+	else {
+		if ( write(fd, "A\n", 2) == -1 ) {
+			printf("Acknowledge error\n");
+			exit(0);
+		}
 	}
 	return;
 }
