@@ -61,10 +61,10 @@ void serveClient(int netfd) {
 }
 
 // configures server address (Port, family, and address).
-void setServerAddress(struct sockaddr_in* servAddr, int port) {
+void setServerAddress(struct sockaddr_in* servAddr) {
 	memset(servAddr, 0, sizeof(*servAddr));
 	servAddr->sin_family = AF_INET;
-	servAddr->sin_port = htons(port);
+	servAddr->sin_port = htons(PORT);
 	servAddr->sin_addr.s_addr = htonl(INADDR_ANY);
 
 	return;
@@ -84,20 +84,4 @@ void bindNameToSocket(int listenfd, struct sockaddr_in* servAddr) {
 			exit(1);
 	}
 
-}
-
-int get_port( int socketfd) {
-
-	struct sockaddr_in childname;
-
-	socklen_t addrlen = (socklen_t)sizeof(childname);
-
-	memset(&childname, 0, sizeof(childname));
-
-	if ( getsockname(socketfd, &childname, &addrlen ) == -1) {
-		perror("Error on getsocketname");
-		exit(1);
-	}
-
-	return ntohs(childname.sin_port);
 }

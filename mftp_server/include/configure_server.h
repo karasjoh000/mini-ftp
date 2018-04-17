@@ -5,9 +5,8 @@ void shutdownServer(int code);
 void killZombies();
 void releaser(void* p);
 void serveClient(int netfd);
-void setServerAddress(struct sockaddr_in* servAddr);
+void setServerAddress(struct sockaddr_in* servAddr, int port);
 void bindNameToSocket(int listenfd, struct sockaddr_in* servAddr);
+int get_port( int socketfd);
 
-
-#define PORT 49999
 #endif

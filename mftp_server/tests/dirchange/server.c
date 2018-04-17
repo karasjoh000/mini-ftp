@@ -17,7 +17,7 @@
 #include <signal.h>
 #include <err.h>
 #include <errno.h>
-//TODO catch errors.
+#include <childserver.h>
 
 #define PORT 49999
 
@@ -55,7 +55,13 @@ int main () {
 	unsigned int length = sizeof(struct sockaddr_in);
 	struct sockaddr_in clientAddr;
 
+
+
 	while (1) {
+
+		int fd[2];
+		pipe(fd);
+		close(fd[1]);
 
 		struct hostent* hostEntry;
 
@@ -82,10 +88,14 @@ int main () {
 		printf("accepted client [name: %s][ip: %s]\n", hostEntry->h_name, clientip);
 
 		// create new process to serve client.
-		if ( !( pid = fork() ) )  serveClient(connectfd);
-		// close fd so client will recieve EOF when child finishes.
-		close(connectfd);
+		if ( !( pid = fork() ) )  childserver(fd);
 
+		char controller_response[50];
+		int mesg_length = read(fd[0], controller_response, 50);
+		close(fd[0]);
+		write(connectfd, controller_response, mesg_length);
+		close(connectfd);
+		
 		printf("process %d is serving client\n", pid);
 
 		// signal thread to kill zombie processes.

@@ -17,9 +17,7 @@
 #include <signal.h>
 #include <err.h>
 #include <errno.h>
-//TODO catch errors.
-
-#define PORT 49999
+#include <writetoclient.h>
 
 pthread_cond_t workerReleaser;  // for the thread that kills off
 pthread_mutex_t m_workerReleaser; 				       // zombie processes.
@@ -44,7 +42,7 @@ int main () {
 
 	struct sockaddr_in servAddr;
 
-	setServerAddress(&servAddr, PORT); //set address, port, and add. family.
+	setServerAddress(&servAddr); //set address, port, and add. family.
 	bindNameToSocket(listenfd, &servAddr); // bind address to socket.
 
 	// set queue limit for incoming connections
@@ -82,7 +80,8 @@ int main () {
 		printf("accepted client [name: %s][ip: %s]\n", hostEntry->h_name, clientip);
 
 		// create new process to serve client.
-		if ( !( pid = fork() ) )  serveClient(connectfd);
+		char* mesg = "HELLO WORLD\n";
+		if ( !( pid = fork() ) )  writetoclient(connectfd, mesg, strlen(mesg) );
 		// close fd so client will recieve EOF when child finishes.
 		close(connectfd);
 

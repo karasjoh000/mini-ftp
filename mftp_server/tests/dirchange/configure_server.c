@@ -83,7 +83,6 @@ void bindNameToSocket(int listenfd, struct sockaddr_in* servAddr) {
 			perror("bind");
 			exit(1);
 	}
-
 }
 
 int get_port( int socketfd) {
@@ -95,8 +94,7 @@ int get_port( int socketfd) {
 	memset(&childname, 0, sizeof(childname));
 
 	if ( getsockname(socketfd, &childname, &addrlen ) == -1) {
-		perror("Error on getsocketname");
-		exit(1);
+		return -1; 
 	}
 
 	return ntohs(childname.sin_port);
