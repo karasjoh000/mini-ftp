@@ -1,1 +1,1 @@
-void send_acknowledgment( int controlfd, char* str);
+void send_acknowledgment( int controlfd, int port);

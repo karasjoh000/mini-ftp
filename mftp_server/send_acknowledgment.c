@@ -1,14 +1,13 @@
 #include <string.h>
+#include <unistd.h>
 
-void send_acknowledgment( int controlfd, char* str) {
-
-}
-
-int format(char* str) {
-	int len = strlen(str);
-	int len = strlen(str) + 1;
-	for( int i = len; i > 0; i-- )
-		str[i] = str[i-1];
-	str[0] = 'A';
-	return len;
+void send_acknowledgment( int controlfd, int port) {
+	char buffer[50];
+	if ( port == -1 ) {
+		strcpy(buffer, "A\n");
+		write(controlfd, buffer, 2);
+	} else {
+		sprintf(buffer, "A%d\n", port);
+		write(controlfd, buffer, strlen(buffer));
+	}
 }

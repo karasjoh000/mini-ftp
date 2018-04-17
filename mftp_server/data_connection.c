@@ -32,12 +32,23 @@ void create_data_connection(DATACON* info, int clientfd) {
 
 	setServerAddress(&servAddr, 0); //set address, port, and add. family.
 
-	if (bindNameToSocket(info->fd, &servAddr) == -1) // bind address to socket.
+	if (bindNameToSocket(info->fd, &servAddr) == -1) { // bind address to socket.
 		send_error(clientfd, ERRNO, NULL);
-	if(listen(info->fd, 1) == -1)
+		return;
+	}
+	if(listen(info->fd, 1) == -1) {
 		send_error(clientfd, ERRNO, NULL);
-	if( ( info->port = get_port( info->fd ) ) == -1 )
+		return;
+	}
+	if( ( info->port = get_port( info->fd ) ) == -1 ) {
 		send_error(clientfd, ERRNO, NULL);
+		return;
+	}
+	//send acknowledgment to client with port.
+	char buffer[50];
+	sprintf(buffer, "A%d\n", port);
+	write(controlfd, buffer, strlen(buffer));
+
 	return;
 }
 

@@ -20,6 +20,7 @@
 #include <debug.h>
 #include <send_error.h>
 #include <data_connection.h>
+#include <send_acknowledgment.h>
 //TODO catch errors.
 
 #define PORT 49999
@@ -64,12 +65,12 @@ void control_connection(int controlfd) {
 			case 'D':
 				create_data_connection(&datac, controlfd);
 			default :
+				send_error(controlfd, CUST, "Not a valid command\n");
 		}
 	}
 }
 
 
-}
 
 
 int main () {
