@@ -1,4 +1,5 @@
 #include <configure_server.h>
+#include <control_commands.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -19,9 +20,6 @@
 #include <errno.h>
 #include <debug.h>
 #include <send_error.h>
-#include <data_connection.h>
-#include <send_acknowledgment.h>
-#include <changedir.h>
 //TODO catch errors.
 
 #define PORT 49999
@@ -48,7 +46,7 @@ void control_connection(int controlfd) {
 	DATACON datac;
 	while (true) {
 		char controlmesg[CTRL_MSG_SIZE], buffer[CTRL_MSG_SIZE];
-		char controlmesg[0] = "\0";
+		controlmesg[0] = '\0';
 		int bytes_read;
 		while ( ( bytes_read = read(controlfd, buffer, CTRL_MSG_SIZE) ) != 0) {
 			if ( ( strlen(controlmesg) + bytes_read ) >=  CTRL_MSG_SIZE ) {
@@ -64,13 +62,17 @@ void control_connection(int controlfd) {
 		}
 		switch (controlmesg[0]) {
 			case 'D':
-				create_data_connection(&datac, controlfd);
+				if ( strcmp(controlmesg, "D") != 0 )
+					goto error;
+				create_data_connection(controlfd, &datac);
 				break;
 			case 'C':
-				sscanf(controlmesg, "C%s\n", controlmesg);
+				if ( sscanf(controlmesg, "C%s\n", controlmesg) <= 0 )
+					goto error;
 				changedir(controlfd, controlmesg);
 				break;
 			default:
+			error:
 				send_error(controlfd, CUST, "Not a valid command\n");
 		}
 	}

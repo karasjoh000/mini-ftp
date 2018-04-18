@@ -1,5 +1,0 @@
-#ifndef _CONTROL_CONNECTION_H_
-#define _CONTROL_CONNECTION_H_
-
-
-#endif
