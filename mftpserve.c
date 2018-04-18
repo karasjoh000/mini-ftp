@@ -21,6 +21,7 @@
 #include <send_error.h>
 #include <data_connection.h>
 #include <send_acknowledgment.h>
+#include <changedir.h>
 //TODO catch errors.
 
 #define PORT 49999
@@ -64,7 +65,12 @@ void control_connection(int controlfd) {
 		switch (controlmesg[0]) {
 			case 'D':
 				create_data_connection(&datac, controlfd);
-			default :
+				break;
+			case 'C':
+				sscanf(controlmesg, "C%s\n", controlmesg);
+				changedir(controlfd, controlmesg);
+				break;
+			default:
 				send_error(controlfd, CUST, "Not a valid command\n");
 		}
 	}

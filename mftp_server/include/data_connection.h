@@ -5,4 +5,4 @@ typedef struct dataconn {
 	int port;
 } DATACON;
 
-void create_data_connection(DATACON* info, int clientfd);
+void create_data_connection(int clientfd, DATACON* info);

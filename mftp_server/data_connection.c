@@ -22,35 +22,7 @@
 #include <data_connection.h>
 #include <configure_server.h>
 
-void create_data_connection(DATACON* info, int clientfd) {
-	info->fd = socket(AF_INET, SOCK_STREAM, 0);
-	if ( info->fd == -1 ) {
-		send_error(clientfd, ERRNO, NULL);
-		return;
-	}
-	struct sockaddr_in servAddr;
 
-	setServerAddress(&servAddr, 0); //set address, port, and add. family.
-
-	if (bindNameToSocket(info->fd, &servAddr) == -1) { // bind address to socket.
-		send_error(clientfd, ERRNO, NULL);
-		return;
-	}
-	if(listen(info->fd, 1) == -1) {
-		send_error(clientfd, ERRNO, NULL);
-		return;
-	}
-	if( ( info->port = get_port( info->fd ) ) == -1 ) {
-		send_error(clientfd, ERRNO, NULL);
-		return;
-	}
-	//send acknowledgment to client with port.
-	char buffer[50];
-	sprintf(buffer, "A%d\n", port);
-	write(controlfd, buffer, strlen(buffer));
-
-	return;
-}
 
 void notifyServer(char* stre, int length, int* fd ) {
 	close(fd[0]);
