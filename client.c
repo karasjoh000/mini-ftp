@@ -7,7 +7,7 @@
    Using network sockets, make a server and client where client gets time
    from the server. This file is the implementation of the client side.
 */
-
+#include <mftp.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -26,7 +26,7 @@
 
 #define CTRL_MSG_SIZE 512
 
-#define PORT 49999
+//#define PORT 49999
 /* Configures the address of the server. */
 void setConnectionAddress(struct sockaddr_in *servAddr, struct hostent* host, int port) {
 	// set to 0 to avoid unwanted configurations.
@@ -66,24 +66,21 @@ int main (int argc, char** argv) {
 
 	int bytes_read;
 
-	while ( ( bytes_read = read(socketfd, buffer, CTRL_MSG_SIZE) ) != 0) {
-		if ( ( strlen(controlmesg) + bytes_read ) >=  CTRL_MSG_SIZE ) {
-			send_error(socketfd, CUST, "Command to large for server buffer");
-		}
-		for ( int i = strlen(controlmesg), j = 0; j < bytes_read; i++, j++ ) {
-			if ( buffer[j] == '\n') {
-				controlmesg[i] = '\0';
-				break;
-			}
-			controlmesg[i] = buffer[j];
-		}
-	}
+	while(!readfromnet(socketfd, buffer, 512));
 
-	printf("server response:%s", buffer);
+	if (DEBUG) printf("server response:%s\n", buffer);
 
 	strcpy(buffer, "D\n");
+	debugprint("writing D to server");
 	write(socketfd, buffer, strlen(buffer));
 
+	while(!readfromnet(socketfd, buffer, 512));
+
+	if (DEBUG) printf("Severs response: %s\n", buffer);
+
+	int controller_port;
+
+	sscanf(buffer, "A%d", &controller_port);
 
 	int datafd = socket( AF_INET, SOCK_STREAM, 0);
 
@@ -93,10 +90,6 @@ int main (int argc, char** argv) {
 	if ( connect(datafd, (struct sockaddr *) &servAddr, /* Connect to server */
 		       sizeof(servAddr)) == -1)
 		     errx( 1, "error connecting: %s", strerror(errno));
-
-
-
-
-
+        if (DEBUG) printf("connected\n");
 
 }

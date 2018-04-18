@@ -10,6 +10,7 @@
 #include <configure_server.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <debug.h>
 
 
 void create_data_connection(int controlfd, DATACON* info) {
@@ -37,6 +38,7 @@ void create_data_connection(int controlfd, DATACON* info) {
 	//send acknowledgment to client with port.
 	char buffer[50];
 	sprintf(buffer, "A%d\n", info->port);
+	if (DEBUG) printf("sent %s", buffer);
 	write(controlfd, buffer, strlen(buffer));
 
 	return;

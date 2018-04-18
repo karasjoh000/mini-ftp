@@ -20,6 +20,7 @@
 #include <errno.h>
 #include <debug.h>
 #include <send_error.h>
+#include <mftp.h>
 //TODO catch errors.
 
 #define PORT 49999
@@ -45,21 +46,8 @@ void shutdownServer(int code) {
 void control_connection(int controlfd) {
 	DATACON datac;
 	while (true) {
-		char controlmesg[CTRL_MSG_SIZE], buffer[CTRL_MSG_SIZE];
-		controlmesg[0] = '\0';
-		int bytes_read;
-		while ( ( bytes_read = read(controlfd, buffer, CTRL_MSG_SIZE) ) != 0) {
-			if ( ( strlen(controlmesg) + bytes_read ) >=  CTRL_MSG_SIZE ) {
-				send_error(controlfd, CUST, "Command to large for server buffer");
-			}
-			for ( int i = strlen(controlmesg), j = 0; j < bytes_read; i++, j++ ) {
-				if ( buffer[j] == '\n') {
-					controlmesg[i] = '\0';
-					break;
-				}
-				controlmesg[i] = buffer[j];
-			}
-		}
+		char controlmesg[CTRL_MSG_SIZE];
+		while( !readfromnet(controlfd, controlmesg, CTRL_MSG_SIZE) );
 		switch (controlmesg[0]) {
 			case 'D':
 				if ( strcmp(controlmesg, "D") != 0 )
