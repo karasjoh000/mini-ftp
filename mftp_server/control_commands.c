@@ -11,6 +11,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <debug.h>
+#include <fcntl.h>
+#define BUFSIZE 512
 
 
 void create_data_connection(int controlfd, DATACON* info) {
@@ -57,4 +59,15 @@ void changedir(int fd, char* path) {
 		}
 	}
 	return;
+}
+
+bool getfile(int controlfd, int datafd, char* path) {
+	int reads, filefd = open (path, O_RDONLY, 0);
+	if ( filefd == -1 ) return false;
+	char buffer[BUFSIZE];
+	while ( ( reads = read(filefd, buffer, BUFSIZE)) != 0 ) {
+		if ( write( datafd, buffer, reads ) == -1 ) ;
+	}
+	close(datafd);
+	return true;
 }
