@@ -47,17 +47,25 @@ void control_connection(int controlfd) {
 	DATACON datac;
 	while (true) {
 		char controlmesg[CTRL_MSG_SIZE];
+		if (DEBUG) printf("waiting for client input\n");
 		while( !readfromnet(controlfd, controlmesg, CTRL_MSG_SIZE) );
+		if (DEBUG) printf("client input recieved\n");
 		switch (controlmesg[0]) {
 			case 'D':
 				if ( strcmp(controlmesg, "D") != 0 )
 					goto error;
 				create_data_connection(controlfd, &datac);
+
 				break;
 			case 'C':
-				if ( sscanf(controlmesg, "C%s\n", controlmesg) <= 0 )
+				if ( sscanf(controlmesg, "C%s", controlmesg) <= 0 )
 					goto error;
 				changedir(controlfd, controlmesg);
+				break;
+			case 'G':
+				if ( sscanf(controlmesg, "G%s", controlmesg) <= 0 )
+					goto error;
+				getfile( controlfd, &datac, controlmesg );
 				break;
 			default:
 			error:

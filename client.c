@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <sys/types.h>
 #include <sys/uio.h>
 #include <err.h>
@@ -36,6 +37,39 @@ void setConnectionAddress(struct sockaddr_in *servAddr, struct hostent* host, in
 	// set the server address that client will connect to.
 	memcpy(&servAddr->sin_addr, *(host->h_addr_list), sizeof(struct in_addr));
 
+}
+
+char* getname(char *path) {
+	int len = strlen(path), i;
+	for ( i = len; i >= 0 && path[i] != '/'; --i );
+	if ( i == 0 ) return path;
+	else return &path[i+1];
+
+}
+
+bool readfile(int datafd, char* path) {
+	char filename[CTRL_MSG_SIZE], buffer[512];
+	//strcpy( filename, getname(path));
+	int filefd = open(getname(path), O_RDWR | O_CREAT, 0755), reads;
+	if (filefd == -1 ) {
+		printf("Error on open");
+		exit(1);
+	}
+	printf("reading from network\n");
+	while ( (reads = read(datafd, buffer, 512) ) != 0 ) {
+		if (reads == -1 ) {
+			perror("Error on read");
+			break;
+		}
+		buffer[reads] = '\0';
+		printf("client read: %s\n", buffer);
+		if ( write(filefd, buffer, reads) == -1) {
+			perror("Error on write");
+			break;
+		}
+	}
+	close(filefd);
+	close(datafd);
 }
 
 
@@ -72,7 +106,10 @@ int main (int argc, char** argv) {
 
 	strcpy(buffer, "D\n");
 	debugprint("writing D to server");
-	write(socketfd, buffer, strlen(buffer));
+	if ( write(socketfd, buffer, strlen(buffer)) == -1 ) {
+		perror("error on write");
+		exit(1);
+	}
 
 	while(!readfromnet(socketfd, buffer, 512));
 
@@ -91,5 +128,18 @@ int main (int argc, char** argv) {
 		       sizeof(servAddr)) == -1)
 		     errx( 1, "error connecting: %s", strerror(errno));
         if (DEBUG) printf("connected\n");
+
+	strcpy(buffer, "G/Users/johnkarasev/Desktop/test.txt\n");
+	if (DEBUG) printf("sending:%s", buffer);
+	write(socketfd, buffer, strlen(buffer));
+	if (DEBUG) printf("sent\n");
+	while(!readfromnet(socketfd, buffer, 512));
+	if (DEBUG) printf("Severs response: %s\n", buffer);
+	debugprint("reading from data connection");
+	readfile(datafd, "text.txt");
+	//while(!readfromnet(socketfd, buffer, 512));
+
+
+
 
 }

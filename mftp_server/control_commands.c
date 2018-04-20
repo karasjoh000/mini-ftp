@@ -40,6 +40,12 @@ void create_data_connection(int controlfd, DATACON* info) {
 	//send acknowledgment to client with port.
 	char buffer[50];
 	sprintf(buffer, "A%d\n", info->port);
+	unsigned int length = sizeof(struct sockaddr_in);
+	struct sockaddr_in clientAddr;
+	if ( (info->io_fd = accept( info->port, (struct sockaddr *) &clientAddr,
+	      &length)) == -1 )
+	      send_error(controlfd, ERRNO, NULL);
+
 	if (DEBUG) printf("sent %s", buffer);
 	write(controlfd, buffer, strlen(buffer));
 
@@ -50,24 +56,35 @@ void create_data_connection(int controlfd, DATACON* info) {
 void changedir(int fd, char* path) {
 	printf("in chandedir\n");
 	if (chdir(path) == -1) {
-		//send_error(fd, ERRNO, NULL);
+		send_error(fd, ERRNO, NULL);
 	}
 	else {
 		if ( write(fd, "A\n", 2) == -1 ) {
-			printf("Acknowledge error\n");
+			printf("Acknowledge error\n"); //quits only if connection
 			exit(0);
 		}
 	}
 	return;
 }
 
-bool getfile(int controlfd, int datafd, char* path) {
+bool getfile(int controlfd, DATACON* datafd, char* path) {
+	if(DEBUG) printf("in getfile\n");
 	int reads, filefd = open (path, O_RDONLY, 0);
 	if ( filefd == -1 ) return false;
 	char buffer[BUFSIZE];
 	while ( ( reads = read(filefd, buffer, BUFSIZE)) != 0 ) {
-		if ( write( datafd, buffer, reads ) == -1 ) ;
+		buffer[reads] = '\0';
+		if(DEBUG) printf("sending %s\n", buffer);
+		if ( write( datafd->io_fd, buffer, reads ) == -1 ) {
+			if(DEBUG) printf("recceived error:%s\n", strerror(errno));
+			return false;
+		}
 	}
-	close(datafd);
+	printf("file sent\n");
+	strcpy(buffer, "A\n");
+	write(controlfd, buffer, strlen(buffer) );
+	sleep(6);
+	close(datafd->io_fd);
+	close(datafd->fd);
 	return true;
 }
