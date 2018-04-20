@@ -9,8 +9,12 @@ typedef struct dataconn {
 	int io_fd;
 } DATACON;
 
-void changedir(int controlfd, char* path);
+typedef enum {ERRNO, HERRNO, CUST} error_type;
+
+bool changedir(char* path);
 void create_data_connection(int controlfd, DATACON* info);
-bool getfile(int controlfd, DATACON* datac, char* path);
+void send_error(int clientfd, error_type type, char* str);
+int error_format(char*);
+void send_ack(int controlfd, char* str);
 
 #endif

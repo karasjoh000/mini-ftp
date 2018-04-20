@@ -19,7 +19,6 @@
 #include <err.h>
 #include <errno.h>
 #include <debug.h>
-#include <send_error.h>
 #include <mftp.h>
 //TODO catch errors.
 
@@ -44,31 +43,45 @@ void shutdownServer(int code) {
 
 
 void control_connection(int controlfd) {
-	DATACON datac;
+  	DATACON datac;
 	while (true) {
 		char controlmesg[CTRL_MSG_SIZE];
-		if (DEBUG) printf("waiting for client input\n");
-		while( !readfromnet(controlfd, controlmesg, CTRL_MSG_SIZE) );
-		if (DEBUG) printf("client input recieved\n");
+		debugprint("waiting for client input");
+		while( !readfromnet(controlfd, controlmesg, CTRL_MSG_SIZE) )
+			send_error(controlfd, CUST, "Command to big");
+		debugprint("client input recieved");
 		switch (controlmesg[0]) {
 			case 'D':
 				debugprint("CASE D");
 				if ( strcmp(controlmesg, "D") != 0 )
 					goto error;
 				create_data_connection(controlfd, &datac);
-
 				break;
 			case 'C':
 				debugprint("CASE C");
 				if ( sscanf(controlmesg, "C%s", controlmesg) <= 0 )
 					goto error;
-				changedir(controlfd, controlmesg);
+				if(!changedir(controlmesg))
+					send_error(controlfd, ERRNO, NULL);
+				else send_ack(controlfd, NULL); 
 				break;
 			case 'G':
 				debugprint("CASE G");
 				if ( sscanf(controlmesg, "G%s", controlmesg) <= 0 )
 					goto error;
-				getfile( controlfd, &datac, controlmesg );
+				if(!getfile(datac.io_fd, controlmesg))
+					send_error(controlfd, ERRNO, NULL);
+				else send_ack(controlfd, NULL);
+				close(datac.fd); //close socket fd
+				break;
+			case 'P':
+				debugprint("CASE P");
+				if ( sscanf(controlmesg, "P%s", controlmesg) <= 0)
+					goto error;
+				if(!putfile(datac.fd, controlmesg))
+					send_error(controlfd, ERRNO, NULL);
+				else send_ack(controlfd, NULL);
+				close(datac.fd);
 				break;
 			default:
 			error:
@@ -85,8 +98,8 @@ int main () {
 	signal( SIGINT, shutdownServer );
 	// init list of pid's.
 	// make a seperate thread that will waitpid WNOHANG on the list of pid's.
-	//releaserThread = ( pthread_t* ) malloc( sizeof( pthread_t ));
-	//pthread_create(releaserThread, NULL, ( void* ) releaser, NULL);
+	releaserThread = ( pthread_t* ) malloc( sizeof( pthread_t ));
+	pthread_create(releaserThread, NULL, ( void* ) releaser, NULL);
 
 	// get a fd for socket
 	int listenfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -140,7 +153,7 @@ int main () {
 		printf("process %d is serving client\n", pid);
 
 		// signal thread to kill zombie processes.
-		//pthread_cond_signal(&workerReleaser);
+		pthread_cond_signal(&workerReleaser);
 
 	}
 

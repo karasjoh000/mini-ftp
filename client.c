@@ -23,7 +23,6 @@
 #include <err.h>
 #include <errno.h>
 #include <debug.h>
-#include <send_error.h>
 
 #define CTRL_MSG_SIZE 512
 
@@ -38,40 +37,6 @@ void setConnectionAddress(struct sockaddr_in *servAddr, struct hostent* host, in
 	memcpy(&servAddr->sin_addr, *(host->h_addr_list), sizeof(struct in_addr));
 
 }
-
-char* getname(char *path) {
-	int len = strlen(path), i;
-	for ( i = len; i >= 0 && path[i] != '/'; --i );
-	if ( i == 0 ) return path;
-	else return &path[i+1];
-
-}
-
-bool readfile(int datafd, char* path) {
-	char filename[CTRL_MSG_SIZE], buffer[512];
-	//strcpy( filename, getname(path));
-	int filefd = open(getname(path), O_RDWR | O_CREAT, 0755), reads;
-	if (filefd == -1 ) {
-		printf("Error on open");
-		exit(1);
-	}
-	printf("reading from network\n");
-	while ( (reads = read(datafd, buffer, 512) ) != 0 ) {
-		if (reads == -1 ) {
-			perror("Error on read");
-			break;
-		}
-		buffer[reads] = '\0';
-		printf("client read: %s\n", buffer);
-		if ( write(filefd, buffer, reads) == -1) {
-			perror("Error on write");
-			break;
-		}
-	}
-	close(filefd);
-	close(datafd);
-}
-
 
 int main (int argc, char** argv) {
 
@@ -136,7 +101,7 @@ int main (int argc, char** argv) {
 	//while(!readfromnet(socketfd, buffer, 512));
 	//if (DEBUG) printf("Severs response: %s\n", buffer);
 	debugprint("reading from data connection");
-	readfile(datafd, "text.txt");
+	putfile(datafd, "/Users/johnkarasev/Desktop/test.txt");
 	//while(!readfromnet(socketfd, buffer, 512));
 
 

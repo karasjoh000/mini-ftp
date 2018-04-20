@@ -6,12 +6,16 @@
 #include <stdbool.h>
 #include <errno.h>
 #include <stdlib.h>
-#include <send_error.h>
 #include <configure_server.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <debug.h>
 #include <fcntl.h>
+#include <mftp.h>
+#include <netdb.h>
+
+
+
 #define BUFSIZE 512
 
 
@@ -54,9 +58,9 @@ void create_data_connection(int controlfd, DATACON* info) {
 
 	debugprint("waiting for client to accept on data connection...");
 
-	printf("%d\n", info->port); 
+	printf("%d\n", info->port);
 
-	if ( (info->io_fd = accept( info->fd, (struct sockaddr *) &clientAddr, //DOES NOT ACCEPT??
+	if ( (info->io_fd = accept( info->fd, (struct sockaddr *) &clientAddr,
 	      &length)) == -1 )
 	      send_error(controlfd, ERRNO, NULL);
 	debugprint("client connected");
@@ -65,41 +69,41 @@ void create_data_connection(int controlfd, DATACON* info) {
 }
 
 
-void changedir(int fd, char* path) {
-	printf("in chandedir\n");
-	if (chdir(path) == -1) {
-		send_error(fd, ERRNO, NULL);
-	}
-	else {
-		if ( write(fd, "A\n", 2) == -1 ) {
-			printf("Acknowledge error\n"); //quits only if connection
-			exit(0);
-		}
-	}
+bool changedir(char* path) {
+	debugprint("in change dir routine");
+	if (chdir(path) == -1) return false;
+	return true;
+}
+
+void send_ack(int controlfd, char* str) {
+	char msg[CTRL_MSG_SIZE];
+	if (!str) strcpy(msg, "A\n");
+	else sprintf(msg, "A%s\n", str);
+	write(controlfd, msg, strlen(msg));
 	return;
 }
 
-bool getfile(int controlfd, DATACON* datafd, char* path) {
-	if(DEBUG) printf("in getfile\n");
-	int reads, filefd = open (path, O_RDONLY, 0);
-	if ( filefd == -1 ) {
-		send_error(controlfd, ERRNO, NULL);
-		return false;
+void send_error(int clientfd, error_type type, char* str) {
+	switch (type) {
+
+		case ERRNO:
+			str = strerror(errno);
+			if (write(clientfd, str, error_format(str)) == -1 ) exit(0);
+			break;
+		case HERRNO:
+			str = hstrerror(h_errno);
+			if (write(clientfd, str, error_format(str)) == -1 ) exit(0);
+			break;
+		default:
+			if ( write( clientfd, str, error_format( str ) ) == -1 ) exit(0);
 	}
-	char buffer[BUFSIZE];
-	while ( ( reads = read(filefd, buffer, BUFSIZE)) != 0 ) {
-		buffer[reads] = '\0';
-		if(DEBUG) printf("sending %s\n", buffer);
-		if ( write( datafd->io_fd, buffer, reads ) == -1 ) {
-			if(DEBUG) printf("recceived error:%s\n", strerror(errno));
-			return false;
-		}
-	}
-	printf("file sent\n");
-	strcpy(buffer, "A\n");
-	write(controlfd, buffer, strlen(buffer) );
-	//sleep(6);
-	close(datafd->io_fd);
-	close(datafd->fd);
-	return true;
+
+}
+
+int error_format(char* str) {
+	int len = strlen(str) + 1;
+	for( int i = len; i > 0; i-- )
+		str[i] = str[i-1];
+	str[0] = 'E';
+	return len;
 }
