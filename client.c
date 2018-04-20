@@ -41,7 +41,7 @@ void program_loop(int controlfd, char* host) {
         break;
       case GET:
         if(checkargs(line, &split, GET))
-          
+
 
 			defualt:
 				break;
