@@ -9,7 +9,6 @@
 #include <configure_server.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <debug.h>
 #include <fcntl.h>
 #include <mftp.h>
 #include <netdb.h>

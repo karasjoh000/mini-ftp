@@ -7,7 +7,7 @@
    Using network sockets, make a server and client where client gets time
    from the server. This file is the implementation of the client side.
 */
-
+#include <mftp.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -17,13 +17,16 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <sys/types.h>
 #include <sys/uio.h>
 #include <err.h>
 #include <errno.h>
 #include <debug.h>
 
-#define PORT 49999
+#define CTRL_MSG_SIZE 512
+
+//#define PORT 49999
 /* Configures the address of the server. */
 void setConnectionAddress(struct sockaddr_in *servAddr, struct hostent* host, int port) {
 	// set to 0 to avoid unwanted configurations.
@@ -34,7 +37,6 @@ void setConnectionAddress(struct sockaddr_in *servAddr, struct hostent* host, in
 	memcpy(&servAddr->sin_addr, *(host->h_addr_list), sizeof(struct in_addr));
 
 }
-
 
 int main (int argc, char** argv) {
 
@@ -55,31 +57,52 @@ int main (int argc, char** argv) {
 	             sizeof(servAddr)) == -1)
 		errx( 1, "error connecting: %s", strerror(errno));
 
-	char buffer[50];
-	int charread = read(socketfd, buffer, 50);
-	buffer[charread] = '\0';
-	int controller_port;
-	sscanf(buffer, "A%d\n", &controller_port);
+	char controlmesg[512];
+	char buffer[512];
 
-	close(socketfd);
-	socketfd = socket( AF_INET, SOCK_STREAM, 0);
-	if ( ( hostEntry = gethostbyname( argv[1] ) ) == NULL )  // get struct with host info.
-		errx( 1, "no name associated with %s\n", argv[1]);
-	setConnectionAddress(&servAddr, hostEntry, controller_port);
-
-	printf("attempting to connect to %d\n", controller_port );
-	if ( connect(socketfd, (struct sockaddr *) &servAddr, /* Connect to server */
-		       sizeof(servAddr)) == -1)
-		     errx( 1, "error connecting: %s", strerror(errno));
-
-	strcpy(buffer, "C./~\n"); // This will cause error (this is for testing the send_error())
+	strcpy(buffer, "C..\n"); // This will cause error (this is for testing the send_error())
 	write(socketfd, buffer, strlen(buffer));
 
-	if ( (charread = read(socketfd, buffer, 50) ) != 0) {
-		buffer[charread] = '\0';
-		debugprint("received message:");
-		debugprint(buffer);
+	int bytes_read;
+
+	while(!readfromnet(socketfd, buffer, 512));
+
+	if (DEBUG) printf("server response:%s\n", buffer);
+
+	strcpy(buffer, "D\n");
+	debugprint("writing D to server");
+	if ( write(socketfd, buffer, strlen(buffer)) == -1 ) {
+		perror("error on write");
+		exit(1);
 	}
+
+	while(!readfromnet(socketfd, buffer, 512));
+
+	if (DEBUG) printf("Severs response: %s\n", buffer);
+
+	int data_port;
+
+	sscanf(buffer, "A%d", &data_port);
+
+	int datafd = socket( AF_INET, SOCK_STREAM, 0);
+
+	setConnectionAddress(&servAddr, hostEntry, data_port);
+
+	printf("attempting to connect to %d\n", data_port );
+	if ( connect(datafd, (struct sockaddr *) &servAddr, /* Connect to server */ //CONNECTS BUT SERVER NEVER ACCEPTS
+		       sizeof(servAddr)) < 0)
+		     errx( 1, "error connecting: %s", strerror(errno));
+        if (DEBUG) printf("connected to data port\n");
+
+	strcpy(buffer, "G/Users/johnkarasev/Desktop/test.txt\n");
+	if (DEBUG) printf("sending:%s", buffer);
+	write(socketfd, buffer, strlen(buffer));
+	if (DEBUG) printf("sent\n");
+	//while(!readfromnet(socketfd, buffer, 512));
+	//if (DEBUG) printf("Severs response: %s\n", buffer);
+	debugprint("reading from data connection");
+	putfile(datafd, "/Users/johnkarasev/Desktop/test.txt");
+	//while(!readfromnet(socketfd, buffer, 512));
 
 
 

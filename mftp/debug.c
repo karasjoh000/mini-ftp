@@ -1,5 +1,6 @@
 #include <stdio.h>
-#include <debug.h>
+#include <mftp.h>
+
 void debugprint(char* str) {
 	if ( DEBUG ) {
 		printf("%s\n", str);

@@ -18,7 +18,6 @@
 #include <signal.h>
 #include <err.h>
 #include <errno.h>
-#include <debug.h>
 #include <mftp.h>
 //TODO catch errors.
 
@@ -63,7 +62,7 @@ void control_connection(int controlfd) {
 					goto error;
 				if(!changedir(controlmesg))
 					send_error(controlfd, ERRNO, NULL);
-				else send_ack(controlfd, NULL); 
+				else send_ack(controlfd, NULL);
 				break;
 			case 'G':
 				debugprint("CASE G");
@@ -114,8 +113,7 @@ int main () {
 	if(listen(listenfd, 1) == -1)
 		errx( 1, "error setting connections queue: %s", strerror(errno));
 
-
-	unsigned int length = sizeof(struct sockaddr_in);
+  unsigned int length = sizeof(struct sockaddr_in);
 	struct sockaddr_in clientAddr;
 
 	while (1) {

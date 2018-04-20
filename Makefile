@@ -1,4 +1,5 @@
 SERVER=mftp_server
+SHARED=mftp
 CFLAGS=-c -std=c99 -Wall -pedantic -I$(SERVER)/include -I.
 mftpserve: mftpserve.o networkio.o debug.o configure_server.o zombiekiller.o control_commands.o c
 	gcc  configure_server.o mftpserve.o debug.o networkio.o control_commands.o zombiekiller.o -o mftpserve
@@ -12,10 +13,10 @@ configure_server.o: $(SERVER)/configure_server.c
 	gcc $(CFLAGS) $(SERVER)/configure_server.c
 zombiekiller.o:
 	gcc $(CFLAGS) $(SERVER)/zombiekiller.c
-networkio.o:
-	gcc $(CFLAGS) networkio.c
-debug.o:
-	gcc $(CFLAGS) $(SERVER)/debug.c
+networkio.o: $(SHARED)/networkio.c
+	gcc $(CFLAGS) $(SHARED)/networkio.c
+debug.o: $(SHARED)/debug.c
+	gcc $(CFLAGS) $(SHARED)/debug.c
 client.o: client.c
 	gcc $(CFLAGS) client.c
 clean:

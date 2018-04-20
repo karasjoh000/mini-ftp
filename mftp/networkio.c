@@ -2,7 +2,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
-#include <debug.h>
+#include <mftp.h>
 #include <stdio.h>
 #include <fcntl.h>
 
