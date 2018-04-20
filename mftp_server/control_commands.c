@@ -16,38 +16,47 @@
 
 
 void create_data_connection(int controlfd, DATACON* info) {
+	debugprint("creating new socket.....");
 	info->fd = socket(AF_INET, SOCK_STREAM, 0);
 	if ( info->fd == -1 ) {
 		send_error(controlfd, ERRNO, NULL);
 		return;
 	}
 	struct sockaddr_in servAddr;
-
+	debugprint("got new socket");
 	setServerAddress(&servAddr, 0); //set address, port, and add. family.
-
+	debugprint("binding name....");
 	if (bindNameToSocket(info->fd, &servAddr) == -1) { // bind address to socket.
 		send_error(controlfd, ERRNO, NULL);
 		return;
 	}
+	debugprint("name binded");
+	debugprint("setting listen queue...");
 	if(listen(info->fd, 1) == -1) {
 		send_error(controlfd, ERRNO, NULL);
 		return;
 	}
+	debugprint("queue set");
 	if( ( info->port = get_port( info->fd ) ) == -1 ) {
 		send_error(controlfd, ERRNO, NULL);
 		return;
 	}
+	debugprint("got port number");
 	//send acknowledgment to client with port.
 	char buffer[50];
 	sprintf(buffer, "A%d\n", info->port);
 	unsigned int length = sizeof(struct sockaddr_in);
 	struct sockaddr_in clientAddr;
+
+	if (DEBUG) printf("sending %s on control connection\n", buffer);
+	write(controlfd, buffer, strlen(buffer));
+
+
+	debugprint("waiting for client to accept on data connection");
 	if ( (info->io_fd = accept( info->port, (struct sockaddr *) &clientAddr,
 	      &length)) == -1 )
 	      send_error(controlfd, ERRNO, NULL);
-
-	if (DEBUG) printf("sent %s", buffer);
-	write(controlfd, buffer, strlen(buffer));
+	debugprint("client connected");
 
 	return;
 }
@@ -70,7 +79,10 @@ void changedir(int fd, char* path) {
 bool getfile(int controlfd, DATACON* datafd, char* path) {
 	if(DEBUG) printf("in getfile\n");
 	int reads, filefd = open (path, O_RDONLY, 0);
-	if ( filefd == -1 ) return false;
+	if ( filefd == -1 ) {
+		send_error(controlfd, ERRNO, NULL);
+		return false;
+	}
 	char buffer[BUFSIZE];
 	while ( ( reads = read(filefd, buffer, BUFSIZE)) != 0 ) {
 		buffer[reads] = '\0';
@@ -83,7 +95,7 @@ bool getfile(int controlfd, DATACON* datafd, char* path) {
 	printf("file sent\n");
 	strcpy(buffer, "A\n");
 	write(controlfd, buffer, strlen(buffer) );
-	sleep(6);
+	//sleep(6);
 	close(datafd->io_fd);
 	close(datafd->fd);
 	return true;

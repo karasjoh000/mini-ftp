@@ -52,17 +52,20 @@ void control_connection(int controlfd) {
 		if (DEBUG) printf("client input recieved\n");
 		switch (controlmesg[0]) {
 			case 'D':
+				debugprint("CASE D");
 				if ( strcmp(controlmesg, "D") != 0 )
 					goto error;
 				create_data_connection(controlfd, &datac);
 
 				break;
 			case 'C':
+				debugprint("CASE C");
 				if ( sscanf(controlmesg, "C%s", controlmesg) <= 0 )
 					goto error;
 				changedir(controlfd, controlmesg);
 				break;
 			case 'G':
+				debugprint("CASE G");
 				if ( sscanf(controlmesg, "G%s", controlmesg) <= 0 )
 					goto error;
 				getfile( controlfd, &datac, controlmesg );

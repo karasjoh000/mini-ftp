@@ -115,25 +115,27 @@ int main (int argc, char** argv) {
 
 	if (DEBUG) printf("Severs response: %s\n", buffer);
 
-	int controller_port;
+	int data_port;
 
-	sscanf(buffer, "A%d", &controller_port);
+	sscanf(buffer, "A%d", &data_port);
 
 	int datafd = socket( AF_INET, SOCK_STREAM, 0);
 
-	setConnectionAddress(&servAddr, hostEntry, controller_port);
+	setConnectionAddress(&servAddr, hostEntry, data_port);
 
-	printf("attempting to connect to %d\n", controller_port );
+	sleep(8);
+
+	printf("attempting to connect to %d\n", data_port );
 	if ( connect(datafd, (struct sockaddr *) &servAddr, /* Connect to server */
 		       sizeof(servAddr)) == -1)
 		     errx( 1, "error connecting: %s", strerror(errno));
-        if (DEBUG) printf("connected\n");
+        if (DEBUG) printf("connected to data port\n");
 
 	strcpy(buffer, "G/Users/johnkarasev/Desktop/test.txt\n");
 	if (DEBUG) printf("sending:%s", buffer);
 	write(socketfd, buffer, strlen(buffer));
 	if (DEBUG) printf("sent\n");
-	while(!readfromnet(socketfd, buffer, 512));
+	//while(!readfromnet(socketfd, buffer, 512));
 	if (DEBUG) printf("Severs response: %s\n", buffer);
 	debugprint("reading from data connection");
 	readfile(datafd, "text.txt");
