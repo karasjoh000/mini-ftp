@@ -85,8 +85,8 @@ int main () {
 	signal( SIGINT, shutdownServer );
 	// init list of pid's.
 	// make a seperate thread that will waitpid WNOHANG on the list of pid's.
-	releaserThread = ( pthread_t* ) malloc( sizeof( pthread_t ));
-	pthread_create(releaserThread, NULL, ( void* ) releaser, NULL);
+	//releaserThread = ( pthread_t* ) malloc( sizeof( pthread_t ));
+	//pthread_create(releaserThread, NULL, ( void* ) releaser, NULL);
 
 	// get a fd for socket
 	int listenfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -140,7 +140,7 @@ int main () {
 		printf("process %d is serving client\n", pid);
 
 		// signal thread to kill zombie processes.
-		pthread_cond_signal(&workerReleaser);
+		//pthread_cond_signal(&workerReleaser);
 
 	}
 

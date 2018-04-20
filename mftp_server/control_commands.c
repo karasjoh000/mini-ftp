@@ -45,15 +45,18 @@ void create_data_connection(int controlfd, DATACON* info) {
 	//send acknowledgment to client with port.
 	char buffer[50];
 	sprintf(buffer, "A%d\n", info->port);
-	unsigned int length = sizeof(struct sockaddr_in);
-	struct sockaddr_in clientAddr;
 
 	if (DEBUG) printf("sending %s on control connection\n", buffer);
 	write(controlfd, buffer, strlen(buffer));
 
+	unsigned int length = sizeof(struct sockaddr_in);
+	struct sockaddr_in clientAddr;
 
-	debugprint("waiting for client to accept on data connection");
-	if ( (info->io_fd = accept( info->port, (struct sockaddr *) &clientAddr,
+	debugprint("waiting for client to accept on data connection...");
+
+	printf("%d\n", info->port); 
+
+	if ( (info->io_fd = accept( info->fd, (struct sockaddr *) &clientAddr, //DOES NOT ACCEPT??
 	      &length)) == -1 )
 	      send_error(controlfd, ERRNO, NULL);
 	debugprint("client connected");

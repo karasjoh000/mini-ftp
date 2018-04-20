@@ -123,11 +123,9 @@ int main (int argc, char** argv) {
 
 	setConnectionAddress(&servAddr, hostEntry, data_port);
 
-	sleep(8);
-
 	printf("attempting to connect to %d\n", data_port );
-	if ( connect(datafd, (struct sockaddr *) &servAddr, /* Connect to server */
-		       sizeof(servAddr)) == -1)
+	if ( connect(datafd, (struct sockaddr *) &servAddr, /* Connect to server */ //CONNECTS BUT SERVER NEVER ACCEPTS
+		       sizeof(servAddr)) < 0)
 		     errx( 1, "error connecting: %s", strerror(errno));
         if (DEBUG) printf("connected to data port\n");
 
@@ -136,7 +134,7 @@ int main (int argc, char** argv) {
 	write(socketfd, buffer, strlen(buffer));
 	if (DEBUG) printf("sent\n");
 	//while(!readfromnet(socketfd, buffer, 512));
-	if (DEBUG) printf("Severs response: %s\n", buffer);
+	//if (DEBUG) printf("Severs response: %s\n", buffer);
 	debugprint("reading from data connection");
 	readfile(datafd, "text.txt");
 	//while(!readfromnet(socketfd, buffer, 512));
