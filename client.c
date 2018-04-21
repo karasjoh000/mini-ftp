@@ -59,9 +59,10 @@ int main (int argc, char** argv) {
 	if( argc == 1 )
 		errx(0, "please provide a hostname in arguments");
   debugprint("in client");
+  if(DEBUG) printf("Attempting to connect to port: %d\n", PORT); 
   int controlfd = create_connection(argv[1], PORT);
-  debugprint("got controlfd client");
   if (controlfd == -1) return 0;
+  debugprint("got controlfd client");
   program_loop(controlfd, argv[1]);
   return 0;
 

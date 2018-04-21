@@ -18,7 +18,7 @@ void setConnectionAddress(struct sockaddr_in *servAddr, struct hostent* host, in
 }
 
 int create_connection(char* host, int port) {
-  
+
 	int socketfd = socket( AF_INET, SOCK_STREAM, 0); // get a socket fd.
 	struct sockaddr_in servAddr;
 	struct hostent* hostEntry;

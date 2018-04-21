@@ -17,7 +17,7 @@ bool checkargs( char* arg1, char* arg2, char* path, int cmd) {
       printf("Error: Please provide a path\n");
       return false;
     }
-    if (strlen(arg1) > CTRL_MSG_SIZE - 1) {
+    if (strlen(arg1) > CTRL_MSG_SIZE - 1) { 
       printf("Error: Path cannot fit to buffer");
       return false;
     } else strcpy(path, arg1);

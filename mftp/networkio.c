@@ -43,7 +43,7 @@ bool getfile(int datafd, char* path) {
 	if(DEBUG) printf("in getfile\n");
 	int reads, filefd = open (path, O_RDONLY, 0);
 	if ( filefd == -1 ) {
-		if (DEBUG) perror("Error opening file to write to");
+		if (DEBUG) perror("Error opening file to read from");
 		return false;
 	}
 	char buffer[BUFSIZE];
@@ -62,9 +62,10 @@ bool getfile(int datafd, char* path) {
 
 bool putfile(int datafd, char* path) {
 	char buffer[512];
+  if(DEBUG) printf("creating file %s...", getname(path));
 	int filefd = open(getname(path), O_RDWR | O_CREAT, 0755), reads;
 	if (filefd == -1 ) {
-		printf("Error on open");
+		printf("Error on create");
 		exit(1);
 	}
 	printf("reading from network\n");

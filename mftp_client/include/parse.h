@@ -7,6 +7,5 @@
 #define RLS      6
 #define EXIT     7
 
-char* readline();
 int hash(char*);
 bool checkargs( char* arg1, char* arg2, char* path, int cmd);

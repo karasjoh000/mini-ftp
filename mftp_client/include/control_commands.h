@@ -7,5 +7,6 @@ void rcd(int fd, char* path);
 int createdatac(int controlfd, char* host);
 void get(int fd, char *line, char* split);
 void print_error(error_type type, char* str);
+bool isError(char* response); 
 
 #endif
