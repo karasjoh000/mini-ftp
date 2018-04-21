@@ -9,6 +9,7 @@
 #include <connect.h>
 
 void rcd(int fd, char* path) {
+  printf("path:%s", path);
   char mesg[CTRL_MSG_SIZE];
 	sprintf(mesg, "C%s", path);
 	write(fd, mesg, strlen(mesg));

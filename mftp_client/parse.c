@@ -11,7 +11,9 @@ char* readline() {
 }
 
 bool checkargs(char* line, char* split, int cmd) {
+  debugprint("checking args");
   char *path = NULL;
+  strtok(line, split); //get rid of the first cmd.
   //for commands with paths, make sure they have a path.
   //and that path is not to big.
   if( !(cmd ^ CD && cmd ^ RCD && cmd ^ GET
@@ -20,6 +22,7 @@ bool checkargs(char* line, char* split, int cmd) {
       printf("Please provide a path\n");
       return false;
     }
+    printf("first arg: %s", path);
     if (strlen(path) > CTRL_MSG_SIZE - 1) {
       printf("Path cannot fit to buffer");
       return false;
@@ -34,10 +37,14 @@ bool checkargs(char* line, char* split, int cmd) {
 }
 
 int hash(char *str) {
+  if (DEBUG) printf("hashing %s\n", str);
   if(strcmp( str, "ls" )  == 0 ) return LS;
   if(strcmp( str, "rcd" ) == 0 ) return RCD;
   if(strcmp( str, "rls" ) == 0 ) return RLS;
-  if(strcmp( str, "cd" )  == 0 ) return CD;
+  if(strcmp( str, "cd" )  == 0 ) {
+    debugprint("returning cd code");
+    return CD;
+  }
   if(strcmp( str, "get" ) == 0 ) return GET;
   if(strcmp(str, "put" )  == 0 ) return PUT;
   if(strcmp(str, "show" ) == 0 ) return SHOW;

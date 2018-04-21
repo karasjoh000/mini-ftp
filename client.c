@@ -8,42 +8,43 @@
    from the server. This file is the implementation of the client side.
 */
 #include <mftp.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <unistd.h>
-#include <fcntl.h>
 #include <sys/types.h>
 #include <sys/uio.h>
 #include <err.h>
 #include <errno.h>
 #include <parse.h>
+#include <stdbool.h>
 #include <control_commands.h>
 #include <connect.h>
 
 #define CTRL_MSG_SIZE   512
-#define CMD_SIZE        4096
+#define CMD_SIZE        20
 
 void program_loop(int controlfd, char* host) {
-	char split = ' ';
+  char cmdbuffer[CMD_SIZE];
+	char *split = " ";
 	while(true) {
 		printf("[mftp]:");
-		char *line = readline();
-		switch( hash( strtok( line, &split ) ) ) {
+		fgets(cmdbuffer, CMD_SIZE, stdin);
+    if (DEBUG) printf("read %s", cmdbuffer);
+		switch( hash( strtok( cmdbuffer, split ) ) ) {
 			case RCD:
-        if(checkargs(line, &split, RCD))
-          rcd(controlfd, line);
+        if(checkargs(cmdbuffer, split, RCD))
+          rcd(controlfd, cmdbuffer);
         break;
       case GET:
-        if(checkargs(line, &split, GET))
-
-
-			defualt:
+        if(checkargs(cmdbuffer, split, GET))
+          get(controlfd, cmdbuffer, host);
+        break;
+      case PUT:
+        if(checkargs(cmdbuffer, split, PUT))
+          put(controlfd, cmdbuffer, host);
+        break;
+			default:
+        printf("Invalid command\n");
 				break;
 		}
 
@@ -56,8 +57,9 @@ int main (int argc, char** argv) {
 
 	if( argc == 1 )
 		errx(0, "please provide a hostname in arguments");
-
+  debugprint("in client");
   int controlfd = create_connection(argv[1], PORT);
+  debugprint("got controlfd client");
   if (controlfd == -1) return 0;
   program_loop(controlfd, argv[1]);
   return 0;
