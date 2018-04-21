@@ -14,8 +14,8 @@ bool readfromnet(int fd, char *mesg, int buflen) {
 	mesg[0] = '\0';
 	int reads;
 	while ( ( reads = read(fd, &buffer, 1) ) != 0 ) {
-		if ( reads == -1) {
-			perror("error on read, child server exiting");
+		if ( reads < 0) {
+			debugprint("error on read, child server exiting");
 			exit(0);
 		}
 		int length = strlen(mesg);
@@ -26,7 +26,9 @@ bool readfromnet(int fd, char *mesg, int buflen) {
 		mesg[length] = buffer;
 		mesg[length + 1] = '\0';
 	}
+  debugprint("Connection closed, process exiting");
 	exit(0);
+  //return false;
 }
 
 char* getname(char *path) {

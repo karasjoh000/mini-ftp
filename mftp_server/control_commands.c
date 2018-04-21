@@ -70,24 +70,39 @@ void create_data_connection(int controlfd, DATACON* info) {
 
 bool changedir(char* path) {
 	debugprint("in change dir routine");
-	if (chdir(path) == -1) return false;
+	if (chdir(path) == -1) {
+    if (DEBUG) perror("Failed changing dir");
+    return false;
+  }
+  debugprint("Successfully changed dir");
 	return true;
 }
 
 void send_ack(int controlfd, char* str) {
+  debugprint("sending ack");
 	char msg[CTRL_MSG_SIZE];
 	if (!str) strcpy(msg, "A\n");
 	else sprintf(msg, "A%s\n", str);
-	write(controlfd, msg, strlen(msg));
+	if (write(controlfd, msg, strlen(msg)) == -1) {
+    perror("Fatal error. Connection broken, exiting child server");
+    exit(0);
+  }
+  debugprint("acknowledgment sent.");
 	return;
 }
 
 void send_error(int clientfd, error_type type, char* str) {
+  debugprint("sending error...");
 	switch (type) {
-
 		case ERRNO:
-			str = strerror(errno);
-			if (write(clientfd, str, error_format(str)) == -1 ) exit(0);
+      debugprint("In errno case");
+      char mesg[CTRL_MSG_SIZE];
+      sprintf(mesg, "E%s\n", strerror(errno));
+			if (write(clientfd, mesg, strlen(mesg)) == -1 ) {
+        if (DEBUG) perror("Connection broken, child server exiting");
+        exit(0);
+      }
+      debugprint("error sent");
 			break;
 		case HERRNO:
 			str = hstrerror(h_errno);

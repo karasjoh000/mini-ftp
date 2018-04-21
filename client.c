@@ -21,27 +21,28 @@
 #include <connect.h>
 
 #define CTRL_MSG_SIZE   512
-#define CMD_SIZE        20
+#define CMD_SIZE        550
 
 void program_loop(int controlfd, char* host) {
   char cmdbuffer[CMD_SIZE];
 	char *split = " ";
+  char path[CTRL_MSG_SIZE];
 	while(true) {
 		printf("[mftp]:");
 		fgets(cmdbuffer, CMD_SIZE, stdin);
     if (DEBUG) printf("read %s", cmdbuffer);
-		switch( hash( strtok( cmdbuffer, split ) ) ) {
+		switch( hash( strtok( cmdbuffer, split) ) ) {
 			case RCD:
-        if(checkargs(cmdbuffer, split, RCD))
-          rcd(controlfd, cmdbuffer);
+        if(checkargs( (strtok( NULL, split)) , strtok( NULL, split), path, RCD))
+          rcd(controlfd, path);
         break;
       case GET:
-        if(checkargs(cmdbuffer, split, GET))
-          get(controlfd, cmdbuffer, host);
+        if(checkargs(strtok( NULL, split), strtok( NULL, split), path, GET))
+          get(controlfd, path, host);
         break;
       case PUT:
-        if(checkargs(cmdbuffer, split, PUT))
-          put(controlfd, cmdbuffer, host);
+        if(checkargs(strtok( NULL, split), strtok( NULL, split), path, PUT))
+          put(controlfd, path, host);
         break;
 			default:
         printf("Invalid command\n");

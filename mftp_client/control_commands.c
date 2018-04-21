@@ -9,11 +9,16 @@
 #include <connect.h>
 
 void rcd(int fd, char* path) {
-  printf("path:%s", path);
+  debugprint("in rcd");
+  printf("path:%s\n", path);
   char mesg[CTRL_MSG_SIZE];
-	sprintf(mesg, "C%s", path);
-	write(fd, mesg, strlen(mesg));
-	if(!readfromnet(fd, &mesg, CTRL_MSG_SIZE)) {
+	sprintf(mesg, "C%s\n", path);
+  if(DEBUG) printf("Sending to controller: %s\n", mesg);
+	if ( write(fd, mesg, strlen(mesg)) == -1 ) {
+    perror("Error sending command to controller");
+    return;
+  }
+	while(!readfromnet(fd, mesg, CTRL_MSG_SIZE)) {
 		printf("failed to read acknowledgement from server\n");
     return;
   }
@@ -30,16 +35,18 @@ void cd(char* path) {
 
 void get(int controlfd, char* path, char* host) {
   int datafd;
+  debugprint("creating data connection...");
   if ( (datafd = createdatac(host) ) == -1) {
     printf("Failed create data connection with server\n");
     return;
   }
+  debugprint("data connection successfully created");
   if (!getfile(datafd, path))
     perror("Error retreiving file");
 }
 
 void put(int controlfd, char* path, char* host) {
-  int datafd = createdatac(host);
+  int datafd = createdatac(controlfd, host);
   if ( datafd == -1 ) {
     printf("failed to create data connection with server\n");
     return;
@@ -50,6 +57,7 @@ void put(int controlfd, char* path, char* host) {
 
 int createdatac(int controlfd, char* host) {
     char mesg[CTRL_MSG_SIZE];
+    if(DEBUG) printf("controlfd: %d", controlfd);
     if (write(controlfd, "D\n", 2) == -1)  {
       perror("Error on write to server");
       printf("Connection with server broken. Exiting...\n");

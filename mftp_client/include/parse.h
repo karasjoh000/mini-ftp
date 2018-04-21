@@ -9,4 +9,4 @@
 
 char* readline();
 int hash(char*);
-bool checkargs(char* line, char* split, int cmd);
+bool checkargs( char* arg1, char* arg2, char* path, int cmd);
