@@ -6,7 +6,7 @@
 
 
 bool readfromnet(int fd, char *mesg, int buflen);
-char* getname(char *path);
-bool getfile(int datac, char* path);
-bool putfile(int datafd, char* path);
+char* getname(char *path); //get name from path.
+bool chuckfile(int datafd, int filefd);
+bool catchfile(int datafd, int filefd);
 void debugprint(char* str);

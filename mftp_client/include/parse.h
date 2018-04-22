@@ -7,5 +7,7 @@
 #define RLS      6
 #define EXIT     7
 
+#define SPLIT    " "
+
 int hash(char*);
-bool checkargs( char* arg1, char* arg2, char* path, int cmd);
+bool checkargs(char *cmdline, int cmd);

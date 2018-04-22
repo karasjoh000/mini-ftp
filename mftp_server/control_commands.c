@@ -93,10 +93,10 @@ void send_ack(int controlfd, char* str) {
 
 void send_error(int clientfd, error_type type, char* str) {
   debugprint("sending error...");
+  char mesg[CTRL_MSG_SIZE];
 	switch (type) {
 		case ERRNO:
       debugprint("In errno case");
-      char mesg[CTRL_MSG_SIZE];
       sprintf(mesg, "E%s\n", strerror(errno));
 			if (write(clientfd, mesg, strlen(mesg)) == -1 ) {
         if (DEBUG) perror("Connection broken, child server exiting");
@@ -105,13 +105,40 @@ void send_error(int clientfd, error_type type, char* str) {
       debugprint("error sent");
 			break;
 		case HERRNO:
-			str = hstrerror(h_errno);
-			if (write(clientfd, str, error_format(str)) == -1 ) exit(0);
+      sprintf(mesg, "E%s\n", hstrerror(h_errno));
+			if (write(clientfd, mesg, strlen(mesg)) == -1 ) exit(0);
 			break;
 		default:
 			if ( write( clientfd, str, error_format( str ) ) == -1 ) exit(0);
 	}
+}
 
+void get(int controlfd, int datafd, char* path) {
+  if(DEBUG) printf("in getfile\n");
+  int filefd = open (path, O_RDONLY, 0);
+  if ( filefd == -1 ) {
+  	if (DEBUG) perror("Error opening file to read from");
+    close(datafd);
+    send_error(controlfd, ERRNO, NULL);
+  	return;
+  } else send_ack(controlfd, NULL);
+  if (!chuckfile(datafd, filefd)) {
+    printf("[Error]: Connection broken, child server exiting...\n");
+    exit(0);
+  }
+}
+
+void put(int controlfd, int datafd, char* path) {
+    if(DEBUG) printf("creating file %s...", getname(path));
+  	int filefd = open(getname(path), O_RDWR | O_CREAT, 0755);
+  	if (filefd == -1 ) {
+  		close(datafd);
+      send_error(controlfd, ERRNO, NULL);
+  	} else send_ack(controlfd, NULL);
+    if (!catchfile(datafd, filefd)) {
+      printf("[Error]: Connection broken, child server exiting...\n");
+      exit(0);
+    }
 }
 
 int error_format(char* str) {

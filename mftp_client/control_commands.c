@@ -41,6 +41,14 @@ void cd(char* path) {
 void get(int controlfd, char* path, char* host) {
   char mesg[CTRL_MSG_SIZE];
   int datafd;
+
+  if(DEBUG) printf("creating %s...\n", path);
+  int filefd = open (getname(path), O_RDWR | O_CREAT, 0755);
+  if ( filefd == -1 ) {
+  	perror("[ERROR]: Cannot open file, check your permissions");
+    return;
+  }
+
   debugprint("creating data connection...");
   if ( (datafd = createdatac(controlfd, host) ) == -1) {
     printf("Failed create data connection with server\n");
@@ -65,12 +73,18 @@ void get(int controlfd, char* path, char* host) {
     return;
   }
 
-  if (!putfile(datafd, path))
+  if (!catchfile(datafd, filefd))
     perror("Error retreiving file");
 }
 
 void put(int controlfd, char* path, char* host) {
   char mesg[CTRL_MSG_SIZE];
+
+  int filefd = open (path, O_RDONLY, 0);
+  if ( filefd == -1 ) {
+    perror("[Error]: Cannot open file for reading");
+    return;
+  }
   int datafd = createdatac(controlfd, host);
   if ( datafd == -1 ) {
     printf("[ERROR]: failed to create data connection with server\n");
@@ -86,12 +100,14 @@ void put(int controlfd, char* path, char* host) {
     close(datafd);
     return;
   }
-  if(!getfile(datafd, path)) {
-    perror("[ERROR]: Error sending file\n");
+
+  if(!chuckfile(datafd, filefd)) {
+    perror("[ERROR]: Error sending file, probably server is down\n");
     close(datafd);
     return;
   }
   debugprint("[SUCCESS]: File sent to server");
+
 }
 
 int createdatac(int controlfd, char* host) {

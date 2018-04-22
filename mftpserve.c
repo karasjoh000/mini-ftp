@@ -68,18 +68,14 @@ void control_connection(int controlfd) {
 				debugprint("CASE G");
 				if ( sscanf(controlmesg, "G%s", controlmesg) <= 0 )
 					goto error;
-				if(!getfile(datac.io_fd, controlmesg))
-					send_error(controlfd, ERRNO, NULL);
-				else send_ack(controlfd, NULL);
+				get(controlfd, datac.io_fd, controlmesg);
 				close(datac.fd); //close socket fd
 				break;
 			case 'P':
 				debugprint("CASE P");
 				if ( sscanf(controlmesg, "P%s", controlmesg) <= 0)
 					goto error;
-				if(!putfile(datac.fd, controlmesg))
-					send_error(controlfd, ERRNO, NULL);
-				else send_ack(controlfd, NULL);
+				put(controlfd, datac.io_fd, controlmesg);
 				close(datac.fd);
 				break;
 			default:

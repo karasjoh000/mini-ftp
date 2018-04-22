@@ -36,16 +36,11 @@ char* getname(char *path) {
 	for ( i = len; i >= 0 && path[i] != '/'; --i );
 	if ( i == 0 ) return path;
 	else return &path[i+1];
-
 }
-
-bool getfile(int datafd, char* path) {
+//alternative -> send open fd over socket
+bool chuckfile(int datafd, int filefd) { //sendfile(sockfd, filefd, NULL, BUFSIZE); optimized call.
 	if(DEBUG) printf("in getfile\n");
-	int reads, filefd = open (path, O_RDONLY, 0);
-	if ( filefd == -1 ) {
-		if (DEBUG) perror("Error opening file to read from");
-		return false;
-	}
+	int reads;
 	char buffer[BUFSIZE];
 	while ( ( reads = read(filefd, buffer, BUFSIZE)) != 0 ) {
 		buffer[reads] = '\0';
@@ -60,14 +55,9 @@ bool getfile(int datafd, char* path) {
 	return true;
 }
 
-bool putfile(int datafd, char* path) {
+bool catchfile(int datafd, int filefd) {
 	char buffer[512];
-  if(DEBUG) printf("creating file %s...", getname(path));
-	int filefd = open(getname(path), O_RDWR | O_CREAT, 0755), reads;
-	if (filefd == -1 ) {
-		printf("Error on create");
-		exit(1);
-	}
+  int reads;
 	printf("reading from network\n");
 	while ( (reads = read(datafd, buffer, 512) ) != 0 ) {
 		if (reads == -1 ) return false;
