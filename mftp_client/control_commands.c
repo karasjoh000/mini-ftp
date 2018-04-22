@@ -107,19 +107,20 @@ void put(int controlfd, char* path, char* host) {
 
   int filefd = open (path, O_RDONLY, 0);
   if ( filefd == -1 ) {
-    perror("[Error]: Cannot open file for reading");
+    perror(E_OPEN);
     return;
   }
   int datafd = createdatac(controlfd, host);
   if ( datafd == -1 ) {
-    printf("[ERROR]: failed to create data connection with server\n");
+    printf(E_DATAC);
     return;
   }
   debugprint("[SUCCESS]: Data connection created");
   sprintf(mesg, "P%s\n", path);
   if(DEBUG) printf("[SENDING]: sending over controller: %s ", mesg);
   if (write(controlfd, mesg, strlen(mesg)) == -1) {
-    perror("[FATAL ERROR]: Connection broken, exiting.");
+    perror(FATAL);
+    exit(1);
   }
   if(isError(mesg)) {
     close(datafd);
@@ -127,7 +128,6 @@ void put(int controlfd, char* path, char* host) {
   }
 
   if(!chuckfile(datafd, filefd)) {
-    perror("[ERROR]: Error sending file, probably server is down\n");
     close(datafd);
     return;
   }
@@ -142,12 +142,11 @@ int createdatac(int controlfd, char* host) {
     char mesg[CTRL_MSG_SIZE];
     if(DEBUG) printf("controlfd: %d", controlfd);
     if (write(controlfd, "D\n", 2) == -1)  {
-      perror("Error on write to server");
-      printf("Connection with server broken. Exiting...\n");
+      perror(FATAL);
       exit(0);
     }
     if(!readfromnet(controlfd, &mesg, CTRL_MSG_SIZE)) {
-      printf("failed to read acknowledgement from server\n");
+      printf(E_ACK);
       return -1;
     }
     int port;
@@ -184,7 +183,7 @@ void more20(int controlfd, int *morepipe, print_type type) {
     dup2(morepipe[1], 1);
     close(morepipe[1]); close(morepipe[0]);
     execvp(more_cmd, more_args);
-    perror("[ERROR]: failed to execute more");
+    perror(E_MORE);
     exit(1);
   } else {
     switch(type) {
@@ -206,7 +205,7 @@ void ls(int *prin_con_pipe) {
   dup2(prin_con_pipe[1], 1);
   close(prin_con_pipe[1]); close(prin_con_pipe[0]);
   execvp(ls_cmd, ls_args);
-  perror("[ERROR]: failed to execute ls");
+  perror(E_LS);
   exit(1);
 }
 

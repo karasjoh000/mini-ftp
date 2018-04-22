@@ -17,6 +17,8 @@
 #define E_ACK     "[ERROR]: Failed to read acknowledgement from server\n"
 #define E_WR      "[ERROR]: write to file failed"
 #define E_RD      "[ERROR]: read from file failed"
+#define E_LS      "[ERROR]: failed to execute ls"
+#define E_MORE    "[ERROR]: failed to execute more"
 #define FATAL     "[FATAL ERROR]: Connection broken, exiting."
 
 
