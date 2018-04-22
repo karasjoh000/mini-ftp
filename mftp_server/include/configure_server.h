@@ -1,5 +1,5 @@
-#ifndef _CONFIGURE_SERVER_H_
-#define _CONFIGURE_SERVER_H_
+#ifndef CONFIGURE_SERVER_H
+#define CONFIGURE_SERVER_H
 
 void killZombies();
 void releaser(void* p);

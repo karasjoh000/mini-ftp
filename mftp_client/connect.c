@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <connect.h>
 
 void setConnectionAddress(struct sockaddr_in *servAddr, struct hostent* host, int port) {
 	// set to 0 to avoid unwanted configurations.

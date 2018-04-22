@@ -42,6 +42,9 @@ void program_loop(int controlfd, char* host) {
         if(checkargs( cmdbuffer, PUT))
           put(controlfd, cmdbuffer, host);
         break;
+      case CD:
+        if (checkargs( cmdbuffer, CD))
+          cd(cmdbuffer); 
 			default:
         printf("Invalid command\n");
 				break;

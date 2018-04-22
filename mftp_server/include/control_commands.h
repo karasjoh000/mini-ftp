@@ -1,5 +1,5 @@
-#ifndef _CONTROL_COMMANDS_H_
-#define _CONTROL_COMMANDS_H_
+#ifndef CONTROL_COMMANDS_H
+#define CONTROL_COMMANDS_H
 
 #include <stdbool.h>
 

@@ -7,6 +7,14 @@
 #include <fcntl.h>
 #include <control_commands.h>
 #include <connect.h>
+#include <execvp_args.h>
+
+const char *ls_cmd;
+const char *ls_args[];
+
+const char *more_cmd;
+const char *more_args[];
+
 
 bool isError(char* response) {
 	if(response[0] == 'E') {
@@ -33,9 +41,13 @@ void rcd(int fd, char* path) {
   if(isError(mesg)) return;
 }
 
-void cd(char* path) {
+bool cd(char* path) {
 	debugprint("in change dir routine");
-	if (chdir(path) == -1) perror("[ERROR]: Error changing directory");
+	if (chdir(path) == -1) {
+    perror("[ERROR]: Error changing directory");
+    return false;
+  }
+  return true;
 }
 
 void get(int controlfd, char* path, char* host) {
@@ -125,4 +137,56 @@ int createdatac(int controlfd, char* host) {
     int port;
     if (sscanf(mesg, "A%d", &port) != 1) return -1;
     return create_connection(host, port);
+}
+
+void printcontents(char* path, print_type type, int controlfd) {
+  int morepipe[2];
+  pipe(morepipe);
+  if (fork()) {
+    dup2(morepipe[0], 0);
+    close(morepipe[0]); close(morepipe[1]);
+  } else {
+    if( path && !cd(path) ) exit(0); //if path provided and cd failed exit.
+    more20(controlfd, morepipe, type);
+  }
+}
+
+void more20(int controlfd, int *morepipe, print_type type) {
+  int prin_con_pipe[2];
+  pipe(prin_con_pipe);
+  if(fork()) {
+    dup2(prin_con_pipe[0], 0);
+    close(prin_con_pipe[0]); close(prin_con_pipe[1]);
+    int s; wait(&s);
+    dup2(morepipe[1], 1);
+    close(morepipe[1]); close(morepipe[0]);
+    execvp(more_cmd, more_args);
+    perror("[ERROR]: failed to execute more");
+    exit(1);
+  } else {
+    switch(type) {
+      case PRINTLS:
+        ls(prin_con_pipe); break;
+      case PRINTRLS:
+        rls(controlfd, prin_con_pipe); break;
+      case PRINTSHOW:
+        show(controlfd, prin_con_pipe); break;
+    }
+  }
+}
+
+void ls(int *prin_con_pipe) {
+  dup2(prin_con_pipe[1], 1);
+  close(prin_con_pipe[1]); close(prin_con_pipe[0]);
+  execvp(ls_cmd, ls_args);
+  perror("[ERROR]: failed to execute ls");
+  exit(1);
+}
+
+void show(int controlfd, int *prin_con_pipe) {
+  return;
+}
+
+void rls(int controlfd, int *prin_con_pipe) {
+  return;
 }
