@@ -20,9 +20,6 @@
 #include <control_commands.h>
 #include <connect.h>
 
-#define CTRL_MSG_SIZE   512
-#define CMD_SIZE        550
-
 void program_loop(int controlfd, char* host) {
   char cmdbuffer[CMD_SIZE];
 	while(true) {
@@ -45,9 +42,11 @@ void program_loop(int controlfd, char* host) {
       case CD:
         if (checkargs( cmdbuffer, CD))
           cd(cmdbuffer);
+        break;
       case LS:
         if (checkargs( cmdbuffer, LS))
-          printcontents(controlfd, PRINTLS, NULL); 
+          printcontents(controlfd, PRINTLS, NULL);
+        break;
 			default:
         printf("Invalid command\n");
 				break;

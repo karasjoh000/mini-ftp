@@ -9,12 +9,13 @@
 #include <connect.h>
 #include <execvp_args.h>
 #include <responses.h>
+#include <sys/wait.h>
 
-extern const char *ls_cmd;
-extern const char *ls_args[];
+const char *ls_cmd;
+const char *ls_args[];
 
-extern const char *more_cmd;
-extern const char *more_args[];
+const char *more_cmd;
+const char *more_args[];
 
 
 bool isError(char* response) {
@@ -158,13 +159,17 @@ int createdatac(int controlfd, char* host) {
 
 
 void printcontents(int controlfd, print_type type, char* path) {
+  debugprint("in printcontents");
   int morepipe[2];
   pipe(morepipe);
   if (fork()) {
     dup2(morepipe[0], 0);
     close(morepipe[0]); close(morepipe[1]);
+    int stat; wait(&stat);
+    if(stat == 1) printf(E_CHDIR);
+    return;
   } else {
-    if( path && !cd(path) ) exit(0); //if path provided and cd failed exit.
+    if( path && !cd(path) ) exit(1); //if path provided and cd failed exit.
     more20(controlfd, morepipe, type);
   }
 }

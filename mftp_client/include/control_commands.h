@@ -6,6 +6,9 @@
 typedef enum {ERRNO, HERRNO, CUST} error_type;
 typedef enum {PRINTLS, PRINTRLS, PRINTSHOW} print_type;
 
+#define CTRL_MSG_SIZE   512
+#define CMD_SIZE        550
+
 void rcd(int fd, char* path);
 bool cd(char* path);
 int createdatac(int controlfd, char* host);

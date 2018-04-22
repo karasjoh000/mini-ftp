@@ -4,6 +4,26 @@
 #include <parse.h>
 #include <stdio.h>
 #include <responses.h>
+#include <stdbool.h>
+#include <control_commands.h>
+
+bool *getpath(char* path, char* cmdline) {
+  int plen = strlen(path);
+  if ( (plen = strlen(path) ) > CTRL_MSG_SIZE - 1 ) {
+    printf(E_BIG);
+    return false;
+  }
+  char temp[plen];
+  strcpy(temp, path); strcpy(cmdline, temp);
+  if (cmdline[plen - 1] == '\n') cmdline[plen - 1] = '\0'; //get rid of the new line.
+  return true;
+}
+
+void stripchar(char* str, char ch) {
+  char *pch;
+  if( ( pch = strrchr(str, ch) ) ) *pch = '\0';
+  return;
+}
 
 bool checkargs(char *cmdline, int cmd) {
   char* ptr;
@@ -12,28 +32,28 @@ bool checkargs(char *cmdline, int cmd) {
     case RCD:
     case GET:
     case PUT:
-      if( !( ptr = strtok(NULL, SPLIT) ) ) {
-        printf(E_PATH);
-        return false;
-      }
-      if (strtok(NULL, SPLIT)) {
-        printf(E_MANY);
-        return false;
-      }
-      int plen;
-      if ( (plen = strlen(ptr) ) > CTRL_MSG_SIZE - 1 ) {
-        printf(E_BIG);
-        return false;
-      }
-      char temp[plen];
-      strcpy(temp, ptr); strcpy(cmdline, temp);
-      cmdline[plen - 1] = '\0'; //get rid of the new line.
-      return true;
-    case LS:
-      if( (ptr = strtok(NULL, SPLIT))) {
-        if(!strtok(NULL, SPLIT)) {
-          printf(E_MANY);
+      {
+        if( !( ptr = strtok(NULL, SPLIT) ) ) {
+          printf(E_PATH);
+          return false;
         }
+        if (strtok(NULL, SPLIT)) {
+          printf(E_MANY);
+          return false;
+        }
+        return getpath(ptr, cmdline);
+        break;
+      }
+    case LS:
+      {
+        if( (ptr = strtok(NULL, SPLIT))) {
+          if(!strtok(NULL, SPLIT)) {
+            printf(E_MANY);
+            return false;
+          } else return getpath(ptr, cmdline);
+        }
+        return true;
+        break;
       }
   }
   return false;
@@ -42,14 +62,20 @@ bool checkargs(char *cmdline, int cmd) {
 
 
 int hash(char *str) {
-  if (DEBUG) printf("hashing %s\n", str);
-  if(strcmp( str, "ls" )  == 0 ) return LS;
-  if(strcmp( str, "rcd" ) == 0 ) return RCD;
-  if(strcmp( str, "rls" ) == 0 ) return RLS;
-  if(strcmp( str, "cd" )  == 0 ) return CD;
-  if(strcmp( str, "get" ) == 0 ) return GET;
-  if(strcmp(str, "put" )  == 0 ) return PUT;
-  if(strcmp(str, "show" ) == 0 ) return SHOW;
-  if(strcmp(str, "exit" ) == 0 ) return EXIT;
+  char format[CMD_SIZE]; //need to make a copy to not screw strtok interator.
+  stripchar(strcpy(format, str), '\n');
+
+  if (DEBUG) printf("hashing %s\n", format);
+  if(strcmp( format, "ls"   ) == 0 ) {
+    debugprint("returning ls\n");
+    return LS;
+  }
+  if(strcmp( format, "rcd"  ) == 0 ) return RCD;
+  if(strcmp( format, "rls"  ) == 0 ) return RLS;
+  if(strcmp( format, "cd"   ) == 0 ) return CD;
+  if(strcmp( format, "get"  ) == 0 ) return GET;
+  if(strcmp(format,  "put"  ) == 0 ) return PUT;
+  if(strcmp(format,  "show" ) == 0 ) return SHOW;
+  if(strcmp(format,  "exit" ) == 0 ) return EXIT;
   return -1;
 }
