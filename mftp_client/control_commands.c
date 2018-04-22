@@ -8,21 +8,24 @@
 #include <control_commands.h>
 #include <connect.h>
 #include <execvp_args.h>
+#include <responses.h>
 
-const char *ls_cmd;
-const char *ls_args[];
+extern const char *ls_cmd;
+extern const char *ls_args[];
 
-const char *more_cmd;
-const char *more_args[];
+extern const char *more_cmd;
+extern const char *more_args[];
 
 
 bool isError(char* response) {
 	if(response[0] == 'E') {
-		printf("Error from server: %s\n", &response[1]);
+		printf(E_SERV, &response[1]);
     return true;
   }
   return false;
 }
+
+
 
 void rcd(int fd, char* path) {
   debugprint("in rcd");
@@ -31,24 +34,29 @@ void rcd(int fd, char* path) {
 	sprintf(mesg, "C%s\n", path);
   if(DEBUG) printf("Sending to controller: %s\n", mesg);
 	if ( write(fd, mesg, strlen(mesg)) == -1 ) {
-    perror("[ERROR]: Error sending command to controller");
+    perror(E_CTRL);
     return;
   }
 	while(!readfromnet(fd, mesg, CTRL_MSG_SIZE)) {
-		printf("[ERROR]: Failed to read acknowledgement from server\n");
+		printf(E_ACK);
     return;
   }
   if(isError(mesg)) return;
 }
 
+
+
 bool cd(char* path) {
 	debugprint("in change dir routine");
 	if (chdir(path) == -1) {
-    perror("[ERROR]: Error changing directory");
+    perror(E_CHDIR);
     return false;
   }
   return true;
 }
+
+
+
 
 void get(int controlfd, char* path, char* host) {
   char mesg[CTRL_MSG_SIZE];
@@ -57,13 +65,13 @@ void get(int controlfd, char* path, char* host) {
   if(DEBUG) printf("creating %s...\n", path);
   int filefd = open (getname(path), O_RDWR | O_CREAT, 0755);
   if ( filefd == -1 ) {
-  	perror("[ERROR]: Cannot open file, check your permissions");
+  	perror(E_OPEN);
     return;
   }
 
   debugprint("creating data connection...");
   if ( (datafd = createdatac(controlfd, host) ) == -1) {
-    printf("Failed create data connection with server\n");
+    printf(E_DATAC);
     return;
   }
   debugprint("[SUCCESS]: Data connection created");
@@ -71,11 +79,12 @@ void get(int controlfd, char* path, char* host) {
   sprintf(mesg, "G%s\n", path);
   if (DEBUG) printf("sending over controller: %s", mesg);
   if (write(controlfd, mesg, strlen(mesg)) == -1) {
-    perror("[FATAL ERROR]: Connection broken, exiting.");
+    perror(FATAL);
+    exit(0);
   }
 
   if(!readfromnet(controlfd, &mesg, CTRL_MSG_SIZE)) {
-    printf("[ERROR]: failed to read acknowledgement from server\n");
+    printf(E_ACK);
     close(datafd);
     return;
   }
@@ -86,8 +95,12 @@ void get(int controlfd, char* path, char* host) {
   }
 
   if (!catchfile(datafd, filefd))
-    perror("Error retreiving file");
+    return;
 }
+
+
+
+
 
 void put(int controlfd, char* path, char* host) {
   char mesg[CTRL_MSG_SIZE];
@@ -122,6 +135,9 @@ void put(int controlfd, char* path, char* host) {
 
 }
 
+
+
+
 int createdatac(int controlfd, char* host) {
     char mesg[CTRL_MSG_SIZE];
     if(DEBUG) printf("controlfd: %d", controlfd);
@@ -139,7 +155,10 @@ int createdatac(int controlfd, char* host) {
     return create_connection(host, port);
 }
 
-void printcontents(char* path, print_type type, int controlfd) {
+
+
+
+void printcontents(int controlfd, print_type type, char* path) {
   int morepipe[2];
   pipe(morepipe);
   if (fork()) {
@@ -150,6 +169,10 @@ void printcontents(char* path, print_type type, int controlfd) {
     more20(controlfd, morepipe, type);
   }
 }
+
+
+
+
 
 void more20(int controlfd, int *morepipe, print_type type) {
   int prin_con_pipe[2];
@@ -175,6 +198,10 @@ void more20(int controlfd, int *morepipe, print_type type) {
   }
 }
 
+
+
+
+
 void ls(int *prin_con_pipe) {
   dup2(prin_con_pipe[1], 1);
   close(prin_con_pipe[1]); close(prin_con_pipe[0]);
@@ -183,9 +210,14 @@ void ls(int *prin_con_pipe) {
   exit(1);
 }
 
+
+
 void show(int controlfd, int *prin_con_pipe) {
   return;
 }
+
+
+
 
 void rls(int controlfd, int *prin_con_pipe) {
   return;

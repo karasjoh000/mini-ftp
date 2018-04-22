@@ -3,7 +3,7 @@
 #include <string.h>
 #include <parse.h>
 #include <stdio.h>
-
+#include <responses.h>
 
 bool checkargs(char *cmdline, int cmd) {
   char* ptr;
@@ -13,22 +13,28 @@ bool checkargs(char *cmdline, int cmd) {
     case GET:
     case PUT:
       if( !( ptr = strtok(NULL, SPLIT) ) ) {
-        printf("[ERROR]: Please provide a path\n");
+        printf(E_PATH);
         return false;
       }
       if (strtok(NULL, SPLIT)) {
-        printf("[ERROR]: To many arguments\n");
+        printf(E_MANY);
         return false;
       }
       int plen;
       if ( (plen = strlen(ptr) ) > CTRL_MSG_SIZE - 1 ) {
-        printf("[ERROR]: Path to big.");
+        printf(E_BIG);
         return false;
       }
       char temp[plen];
       strcpy(temp, ptr); strcpy(cmdline, temp);
       cmdline[plen - 1] = '\0'; //get rid of the new line.
       return true;
+    case LS:
+      if( (ptr = strtok(NULL, SPLIT))) {
+        if(!strtok(NULL, SPLIT)) {
+          printf(E_MANY);
+        }
+      }
   }
   return false;
 }

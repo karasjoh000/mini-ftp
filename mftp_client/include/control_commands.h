@@ -12,7 +12,7 @@ int createdatac(int controlfd, char* host);
 void get(int controlfd, char* path, char* host);
 void put(int controlfd, char* path, char* host);
 void print_error(error_type type, char* str);
-void printcontents(char* path, print_type type, int controlfd);
+void printcontents(int controlfd, print_type type, char* path);
 void more20(int controlfd, int *morepipe, print_type type);
 bool isError(char* response);
 void ls(int *prin_con_pipe);

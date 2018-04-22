@@ -5,6 +5,7 @@
 #include <mftp.h>
 #include <stdio.h>
 #include <fcntl.h>
+#include <responses.h>
 
 #define BUFSIZE 512
 
@@ -15,7 +16,7 @@ bool readfromnet(int fd, char *mesg, int buflen) {
 	int reads;
 	while ( ( reads = read(fd, &buffer, 1) ) != 0 ) {
 		if ( reads < 0) {
-			debugprint("error on read, child server exiting");
+			perror(FATAL);
 			exit(0);
 		}
 		int length = strlen(mesg);
@@ -26,7 +27,7 @@ bool readfromnet(int fd, char *mesg, int buflen) {
 		mesg[length] = buffer;
 		mesg[length + 1] = '\0';
 	}
-  debugprint("Connection closed, process exiting");
+  printf(FATAL);
 	exit(0);
   //return false;
 }
@@ -43,11 +44,14 @@ bool chuckfile(int datafd, int filefd) { //sendfile(sockfd, filefd, NULL, BUFSIZ
 	int reads;
 	char buffer[BUFSIZE];
 	while ( ( reads = read(filefd, buffer, BUFSIZE)) != 0 ) {
+    if(reads == -1) {
+      perror(E_RD);
+    }
 		buffer[reads] = '\0';
 		if(DEBUG) printf("sending %s\n", buffer);
 		if ( write( datafd, buffer, reads ) == -1 ) {
-			if(DEBUG) perror("Error when writing to file form net");
-			return false;
+			perror(FATAL);
+			exit(0);
 		}
 	}
 	debugprint("file sent");
@@ -60,10 +64,16 @@ bool catchfile(int datafd, int filefd) {
   int reads;
 	printf("reading from network\n");
 	while ( (reads = read(datafd, buffer, 512) ) != 0 ) {
-		if (reads == -1 ) return false;
+		if (reads == -1 ) {
+      perror(FATAL);
+      exit(1);
+    }
 		buffer[reads] = '\0';
 		if (DEBUG) printf("data connection read: %s\n", buffer);
-		if ( write(filefd, buffer, reads) == -1) return false;
+		if ( write(filefd, buffer, reads) == -1) {
+      perror(E_WR);
+      return false;
+    }
 	}
 	close(filefd); close(datafd);
 	return true;
