@@ -7,10 +7,10 @@
 #define BUFSIZE         512
 
 extern const char *ls_cmd;
-extern const char *ls_args[];
+extern char *const ls_args[];
 
 extern const char *more_cmd;
-extern const char *more_args[];
+extern char *const more_args[];
 
 
 bool readcontroller(int fd, char *mesg, int buflen);

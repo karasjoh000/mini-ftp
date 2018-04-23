@@ -13,10 +13,10 @@
 //TODO find why -l not working on ls.
 
 const char *ls_cmd;
-const char *ls_args[]; //= {"-l", (void*)NULL};
+char *const ls_args[]; //= {"-l", (void*)NULL};
 
 const char *more_cmd;
-const char *more_args[]; //= {"-20", (void*)NULL};
+char *const more_args[]; //= {"-20", (void*)NULL};
 
 
 bool isError(char* response) {
