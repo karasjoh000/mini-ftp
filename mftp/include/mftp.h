@@ -1,8 +1,15 @@
 #include <stdbool.h>
+#include <stdlib.h>
 
 #define PORT            49999
 #define CTRL_MSG_SIZE   512
 #define DEBUG           1
+
+extern const char *ls_cmd;
+extern const char *ls_args[];
+
+extern const char *more_cmd;
+extern const char *more_args[];
 
 
 bool readfromnet(int fd, char *mesg, int buflen);

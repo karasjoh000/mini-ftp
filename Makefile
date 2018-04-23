@@ -5,10 +5,10 @@ SHARED=mftp
 LIB=-lpthread
 SCFLAGS=-c -std=c99 -Wall -pedantic -I$(SERVER)/include -I$(SHARED)/include
 CCFLAGS=-c -std=c99 -Wall -pedantic -I$(CLIENT)/include -I$(SHARED)/include
-mftpserve: $(OBJ) $(OBJ)/mftpserve.o $(OBJ)/networkio.o $(OBJ)/debug.o $(OBJ)/configure_server.o $(OBJ)/zombiekiller.o $(OBJ)/control_commands.o c
-	gcc  $(OBJ)/mftpserve.o $(OBJ)/networkio.o $(OBJ)/debug.o $(OBJ)/configure_server.o $(OBJ)/zombiekiller.o $(OBJ)/control_commands.o -o mftpserve $(LIB)
-c: $(OBJ) $(OBJ)/client.o $(OBJ)/debug.o $(OBJ)/connect.o $(OBJ)/networkio.o $(OBJ)/c_control_commands.o $(OBJ)/parse.o
-	gcc $(OBJ)/client.o $(OBJ)/debug.o $(OBJ)/connect.o $(OBJ)/networkio.o $(OBJ)/c_control_commands.o $(OBJ)/parse.o -o c $(LIB)
+mftpserve: $(OBJ) $(OBJ)/mftpserve.o $(OBJ)/execvp_args.o $(OBJ)/networkio.o $(OBJ)/debug.o $(OBJ)/configure_server.o $(OBJ)/zombiekiller.o $(OBJ)/control_commands.o c
+	gcc  $(OBJ)/mftpserve.o $(OBJ)/execvp_args.o $(OBJ)/networkio.o $(OBJ)/debug.o $(OBJ)/configure_server.o $(OBJ)/zombiekiller.o $(OBJ)/control_commands.o -o mftpserve $(LIB)
+c: $(OBJ) $(OBJ)/client.o $(OBJ)/execvp_args.o $(OBJ)/debug.o $(OBJ)/connect.o $(OBJ)/networkio.o $(OBJ)/c_control_commands.o $(OBJ)/parse.o
+	gcc $(OBJ)/client.o $(OBJ)/execvp_args.o $(OBJ)/debug.o $(OBJ)/connect.o $(OBJ)/networkio.o $(OBJ)/c_control_commands.o $(OBJ)/parse.o -o c $(LIB)
 $(OBJ)/mftpserve.o: mftpserve.c
 	gcc $(SCFLAGS) mftpserve.c -o $(OBJ)/mftpserve.o
 $(OBJ)/control_commands.o:
@@ -29,6 +29,8 @@ $(OBJ)/parse.o: $(CLIENT)/parse.c
 	gcc $(CCFLAGS) $(CLIENT)/parse.c -o $(OBJ)/parse.o
 $(OBJ)/c_control_commands.o: $(CLIENT)/control_commands.c $(OBJ)
 	gcc $(CCFLAGS) $(CLIENT)/control_commands.c -o $(OBJ)/c_control_commands.o
+$(OBJ)/execvp_args.o: $(SHARED)/execvp_args.c
+	gcc $(CCFLAGS) $(SHARED)/execvp_args.c -o $(OBJ)/execvp_args.o
 $(OBJ):
 	mkdir $(OBJ)
 clean:

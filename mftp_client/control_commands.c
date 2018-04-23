@@ -7,15 +7,14 @@
 #include <fcntl.h>
 #include <control_commands.h>
 #include <connect.h>
-#include <execvp_args.h>
 #include <responses.h>
 #include <sys/wait.h>
 
 const char *ls_cmd;
-const char *ls_args[] = {"-l", (void*)NULL};
+const char *ls_args[]; //= {"-l", (void*)NULL};
 
 const char *more_cmd;
-const char *more_args[] = {"-20", (void*)NULL};
+const char *more_args[]; //= {"-20", (void*)NULL};
 
 
 bool isError(char* response) {
@@ -185,7 +184,7 @@ void more(int controlfd, print_type type) {
 		close( 0 );
 		dup( fd[0] );
 		close( fd[0] );
-		execvp( "more", more_args );
+		execvp( more_cmd, more_args );
 		exit ( 1 );
   } else {
     close( fd[0] );
@@ -208,7 +207,7 @@ void more(int controlfd, print_type type) {
 void ls() {
   printf("in ls\n");
   const char *args[] = {"-l", NULL};
-  execvp("ls", args);
+  execvp(ls_cmd, args);
 }
 
 
