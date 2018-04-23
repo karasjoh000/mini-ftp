@@ -10,6 +10,8 @@
 #include <responses.h>
 #include <sys/wait.h>
 
+//TODO find why -l not working on ls. 
+
 const char *ls_cmd;
 const char *ls_args[]; //= {"-l", (void*)NULL};
 
@@ -183,6 +185,8 @@ bool read_ack(int controlfd) {
 
 
 void printcontents(int controlfd, print_type type, char* path, char* host) {
+  printf("LS ARGS: %s %s\n", ls_args[0], ls_args[1]);
+  printf("MORE ARGS: %s %s\n", more_args[0], more_args[1]);
   int datafd;
   char mesg[CTRL_MSG_SIZE];
   if ( type == PRINTSHOW || type == PRINTRLS ) {
@@ -224,7 +228,7 @@ void more(int controlfd, int datafd, print_type type, char *path, char *host) {
 		close( fd[1] );
 		int status; wait( &status );
 		close( 0 ); dup( fd[0] ); close( fd[0] );
-		execvp( more_cmd, more_args );
+		execvp( more_cmd, more_args);
 		exit ( 2 );
   } else {
     close( fd[0] );
