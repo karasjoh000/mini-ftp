@@ -47,6 +47,7 @@ bool checkargs(char *cmdline, int cmd) {
       }
     case LS:
     case RLS:
+    case EXIT:
       {
         if( (ptr = strtok(NULL, SPLIT))) {
           printf(E_MANY);

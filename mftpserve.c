@@ -85,6 +85,9 @@ void control_connection(int controlfd) {
         ls(controlfd, datac.io_fd);
         close(datac.fd);
         break;
+      case 'Q':
+        send_ack(controlfd, NULL);
+        exit(0);
 			error:
         debugprint("Not valid command");
 				send_error(controlfd, CUST, "Not a valid command\n");
@@ -154,6 +157,7 @@ int main () {
 		printf("process %d is serving client\n", pid);
 
 		// signal thread to kill zombie processes.
+    printf("signal thread\n");
 		pthread_cond_signal(&workerReleaser);
 
 	}

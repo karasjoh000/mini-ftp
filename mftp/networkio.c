@@ -26,7 +26,7 @@ bool readfromnet(int fd, char *mesg, int buflen) {
 		mesg[length] = buffer;
 		mesg[length + 1] = '\0';
 	}
-  printf(FATAL);
+  perror(FATAL); 
 	exit(0);
   //return false;
 }
@@ -61,7 +61,7 @@ bool chuckfile(int datafd, int filefd) { //sendfile(sockfd, filefd, NULL, BUFSIZ
 bool catchfile(int datafd, int filefd) {
 	char buffer[512];
   int reads;
-	printf("reading from network\n");
+	debugprint("reading from network");
 	while ( (reads = read(datafd, buffer, 512) ) != 0 ) {
 		if (reads == -1 ) {
       perror(FATAL);

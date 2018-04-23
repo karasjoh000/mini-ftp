@@ -55,6 +55,10 @@ void program_loop(int controlfd, char* host) {
         if (checkargs( cmdbuffer, SHOW))
           printcontents(controlfd, PRINTSHOW, cmdbuffer, host);
         break;
+      case EXIT:
+        if (checkargs( cmdbuffer, EXIT))
+          quit(controlfd);
+        break;
 			default:
         printf("Invalid command\n");
 				break;

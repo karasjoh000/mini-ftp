@@ -25,6 +25,16 @@ bool isError(char* response) {
   return false;
 }
 
+void quit(int controlfd) {
+  char mesg[CTRL_MSG_SIZE];
+  strcpy(mesg, "Q\n");
+  if ( write(controlfd, mesg, CTRL_MSG_SIZE) == -1) {
+    perror(FATAL);
+    exit(0);
+  }
+  if (!read_ack(controlfd)) return;
+  exit(0);
+}
 
 
 void rcd(int fd, char* path) {
@@ -173,68 +183,52 @@ bool read_ack(int controlfd) {
 
 
 void printcontents(int controlfd, print_type type, char* path, char* host) {
+  int datafd;
+  char mesg[CTRL_MSG_SIZE];
+  if ( type == PRINTSHOW || type == PRINTRLS ) {
+    if ( (datafd = createdatac(controlfd, host) ) == -1) {
+        printf(E_DATAC);
+        exit(1);
+    }
+    switch (type) {
+      case PRINTRLS:
+          strcpy(mesg, "L\n"); break;
+      case PRINTSHOW:
+          sprintf(mesg, "G%s\n", path); break;
+    }
+    if(write(controlfd, mesg, strlen(mesg)) == -1) {
+        perror(FATAL);
+        exit(1);
+    }
+    if(!read_ack(controlfd)){
+        printf(E_ACK); close(datafd); exit(1);
+    }
+
+  }
+
   if (fork()) {
-    int stat; wait(&stat);
+    int status; wait(&status);
     return;
   } else {
     debugprint("In more process");
-    more(controlfd, type, path, host);
+    more(controlfd, datafd, type, path, host);
   }
 }
 
 
-void more(int controlfd, print_type type, char *path, char *host) {
-  int fd[2], datafd;
+void more(int controlfd, int datafd, print_type type, char *path, char *host) {
+  int fd[2];
   pipe(fd);
-
-  char mesg[CTRL_MSG_SIZE];
-
-  switch (type) {
-    case PRINTRLS:
-      debugprint("creating data connection...");
-      if ( (datafd = createdatac(controlfd, host) ) == -1) {
-        printf(E_DATAC);
-        exit(1);
-      }
-      strcpy(mesg, "L\n");
-      if(write(controlfd, mesg, strlen(mesg)) == -1) {
-        perror(FATAL);
-        exit(1);
-      }
-      if(!read_ack(controlfd)){
-          close(datafd); exit(1);
-      }
-      break;
-    case PRINTSHOW:
-      debugprint("creating data connection...");
-      if ( (datafd = createdatac(controlfd, host) ) == -1) {
-        printf(E_DATAC);
-        exit(1);
-      }
-      sprintf(mesg, "G%s\n", path);
-      if (write(controlfd, mesg, strlen(mesg)) == -1) {
-        perror(FATAL);
-        exit(1);
-      }
-      if(!read_ack(controlfd)){
-          close(datafd); exit(1);
-      }
-      break;
-  }
 
   if( fork() ) {
 		close( fd[1] );
 		int status; wait( &status );
-		close( 0 );
-		dup( fd[0] );
-		close( fd[0] );
+		close( 0 ); dup( fd[0] ); close( fd[0] );
 		execvp( more_cmd, more_args );
-		exit ( 1 );
+		exit ( 2 );
   } else {
     close( fd[0] );
-    close( 1 );
-    dup( fd[1] );
-    close( fd[1] );
+    close( 1 ); dup( fd[1] ); close( fd[1] );
     switch(type) {
       case PRINTLS:
         ls(); break;
@@ -244,7 +238,7 @@ void more(int controlfd, print_type type, char *path, char *host) {
       default:
         debugprint("NO CASE MATCH");
     }
-    exit(1);
+    exit(2);
   }
 }
 
@@ -252,6 +246,8 @@ void more(int controlfd, print_type type, char *path, char *host) {
 void ls() {
   const char *args[] = {"-l", NULL};
   execvp(ls_cmd, args);
+  printf("Failed to execute ls\n");
+  exit(2);
 }
 
 void servprint(int controlfd, int datafd, char* host) {
@@ -262,8 +258,8 @@ void servprint(int controlfd, int datafd, char* host) {
   while( (reads = read(datafd, mesg, CTRL_MSG_SIZE)) != 0) {
     if ( write(1, mesg, reads) == -1) {
       perror(E_WR);
-      exit(1);
+      exit(2);
     }
   }
-  exit(0);
+  exit(2);
 }
