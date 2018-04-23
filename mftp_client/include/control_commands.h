@@ -16,10 +16,10 @@ void get(int controlfd, char* path, char* host);
 void put(int controlfd, char* path, char* host);
 void print_error(error_type type, char* str);
 void printcontents(int controlfd, print_type type, char* path);
-void more20(int controlfd, int *morepipe, print_type type);
+void more(int controlfd, print_type type);
 bool isError(char* response);
-void ls(int *prin_con_pipe);
-void show(int controlfd, int *prin_con_pipe);
-void rls(int controlfd, int *prin_con_pipe);
+void ls();
+void show(int controlfd);
+void rls(int controlfd);
 
 #endif

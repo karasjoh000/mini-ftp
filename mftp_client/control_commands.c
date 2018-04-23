@@ -12,10 +12,10 @@
 #include <sys/wait.h>
 
 const char *ls_cmd;
-const char *ls_args[];
+const char *ls_args[] = {"-l", (void*)NULL};
 
 const char *more_cmd;
-const char *more_args[];
+const char *more_args[] = {"-20", (void*)NULL};
 
 
 bool isError(char* response) {
@@ -161,16 +161,14 @@ int createdatac(int controlfd, char* host) {
 void printcontents(int controlfd, print_type type, char* path) {
   debugprint("in printcontents");
   int morepipe[2];
-  pipe(morepipe);
+  //pipe(morepipe);
   if (fork()) {
-    dup2(morepipe[0], 0);
-    close(morepipe[0]); close(morepipe[1]);
     int stat; wait(&stat);
-    if(stat == 1) printf(E_CHDIR);
     return;
   } else {
+    debugprint("In more process");
     if( path && !cd(path) ) exit(1); //if path provided and cd failed exit.
-    more20(controlfd, morepipe, type);
+    more(controlfd, type);
   }
 }
 
@@ -178,51 +176,50 @@ void printcontents(int controlfd, print_type type, char* path) {
 
 
 
-void more20(int controlfd, int *morepipe, print_type type) {
-  int prin_con_pipe[2];
-  pipe(prin_con_pipe);
+void more(int controlfd, print_type type) {
+  int fd[2];
+  pipe(fd);
   if(fork()) {
-    dup2(prin_con_pipe[0], 0);
-    close(prin_con_pipe[0]); close(prin_con_pipe[1]);
-    int s; wait(&s);
-    dup2(morepipe[1], 1);
-    close(morepipe[1]); close(morepipe[0]);
-    execvp(more_cmd, more_args);
-    perror(E_MORE);
-    exit(1);
+		close( fd[1] );
+		int status; wait( &status );
+		close( 0 );
+		dup( fd[0] );
+		close( fd[0] );
+		execvp( "more", more_args );
+		exit ( 1 );
   } else {
+    close( fd[0] );
+    close( 1 );
+    dup( fd[1] );
+    close( fd[1] );
     switch(type) {
       case PRINTLS:
-        ls(prin_con_pipe); break;
+        ls(); break;
       case PRINTRLS:
-        rls(controlfd, prin_con_pipe); break;
+        rls(controlfd); break;
       case PRINTSHOW:
-        show(controlfd, prin_con_pipe); break;
+        show(controlfd); break;
     }
+    exit(1);
   }
 }
 
 
-
-
-
-void ls(int *prin_con_pipe) {
-  dup2(prin_con_pipe[1], 1);
-  close(prin_con_pipe[1]); close(prin_con_pipe[0]);
-  execvp(ls_cmd, ls_args);
-  perror(E_LS);
-  exit(1);
+void ls() {
+  printf("in ls\n");
+  const char *args[] = {"-l", NULL};
+  execvp("ls", args);
 }
 
 
 
-void show(int controlfd, int *prin_con_pipe) {
+void show(int controlfd) {
   return;
 }
 
 
 
 
-void rls(int controlfd, int *prin_con_pipe) {
+void rls(int controlfd) {
   return;
 }

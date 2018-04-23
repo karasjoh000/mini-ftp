@@ -4,9 +4,9 @@
 #include <stdlib.h>
 
 extern const char *ls_cmd = "ls";
-extern const char *ls_args[] = {"-l", NULL};
+extern const char *ls_args[] = {"-l", (void*)NULL};
 
 extern const char *more_cmd = "more";
-extern const char *more_args[] = {"-20", NULL};
+extern const char *more_args[] = {"-20",(void*)NULL};
 
 #endif

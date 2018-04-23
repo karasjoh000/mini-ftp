@@ -15,12 +15,12 @@ bool *getpath(char* path, char* cmdline) {
   }
   char temp[plen];
   strcpy(temp, path); strcpy(cmdline, temp);
-  if (cmdline[plen - 1] == '\n') cmdline[plen - 1] = '\0'; //get rid of the new line.
+  stripchar(cmdline, '\n');  //get rid of the new line.
   return true;
 }
 
 void stripchar(char* str, char ch) {
-  char *pch;
+  char *pch; //get rid of the last newline
   if( ( pch = strrchr(str, ch) ) ) *pch = '\0';
   return;
 }
@@ -66,10 +66,7 @@ int hash(char *str) {
   stripchar(strcpy(format, str), '\n');
 
   if (DEBUG) printf("hashing %s\n", format);
-  if(strcmp( format, "ls"   ) == 0 ) {
-    debugprint("returning ls\n");
-    return LS;
-  }
+  if(strcmp( format, "ls"   ) == 0 ) return LS;
   if(strcmp( format, "rcd"  ) == 0 ) return RCD;
   if(strcmp( format, "rls"  ) == 0 ) return RLS;
   if(strcmp( format, "cd"   ) == 0 ) return CD;
