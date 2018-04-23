@@ -20,7 +20,7 @@
 #include <errno.h>
 #include <mftp.h>
 //TODO catch errors.
-
+//TODO fix zombie killer
 #define PORT 49999
 #define CTRL_MSG_SIZE 512 //maximum size for a control command
 
@@ -105,6 +105,7 @@ int main () {
 	// make a seperate thread that will waitpid WNOHANG on the list of pid's.
 	releaserThread = ( pthread_t* ) malloc( sizeof( pthread_t ));
 	pthread_create(releaserThread, NULL, ( void* ) releaser, NULL);
+  pthread_mutex_init(&m_workerReleaser, NULL);
 
 	// get a fd for socket
 	int listenfd = socket(AF_INET, SOCK_STREAM, 0);
