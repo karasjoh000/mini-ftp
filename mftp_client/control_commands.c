@@ -161,46 +161,68 @@ int createdatac(int controlfd, char* host) {
     return create_connection(host, port);
 }
 
-
-
-
-void printcontents(int controlfd, print_type type, char* path, char* host) {
-  int morepipe[2];
-  //pipe(morepipe);
-  if (fork()) {
-    int stat; wait(&stat);
-    return;
-  } else {
-    debugprint("In more process");
-    if( path && !cd(path) ) {
-      exit(1); //if path provided and cd failed exit.
-    }
-    more(controlfd, type, host);
-  }
-}
-
-bool read_ack(controlfd) {
+bool read_ack(int controlfd) {
   char mesg[CTRL_MSG_SIZE];
   if(!readfromnet(controlfd, &mesg, CTRL_MSG_SIZE)) {
       printf(E_ACK);
       return false;
   }
-  if(isError(mesg)) {
-    return false;
-  }
-
+  if(isError(mesg)) return false;
   return true;
 }
 
 
+void printcontents(int controlfd, print_type type, char* path, char* host) {
+  if (fork()) {
+    int stat; wait(&stat);
+    return;
+  } else {
+    debugprint("In more process");
+    more(controlfd, type, path, host);
+  }
+}
 
 
-
-void more(int controlfd, print_type type, char *host) {
-  int fd[2];
+void more(int controlfd, print_type type, char *path, char *host) {
+  int fd[2], datafd;
   pipe(fd);
-  if( fork() ) {
 
+  char mesg[CTRL_MSG_SIZE];
+
+  switch (type) {
+    case PRINTRLS:
+      debugprint("creating data connection...");
+      if ( (datafd = createdatac(controlfd, host) ) == -1) {
+        printf(E_DATAC);
+        exit(1);
+      }
+      strcpy(mesg, "L\n");
+      if(write(controlfd, mesg, strlen(mesg)) == -1) {
+        perror(FATAL);
+        exit(1);
+      }
+      if(!read_ack(controlfd)){
+          close(datafd); exit(1);
+      }
+      break;
+    case PRINTSHOW:
+      debugprint("creating data connection...");
+      if ( (datafd = createdatac(controlfd, host) ) == -1) {
+        printf(E_DATAC);
+        exit(1);
+      }
+      sprintf(mesg, "G%s\n", path);
+      if (write(controlfd, mesg, strlen(mesg)) == -1) {
+        perror(FATAL);
+        exit(1);
+      }
+      if(!read_ack(controlfd)){
+          close(datafd); exit(1);
+      }
+      break;
+  }
+
+  if( fork() ) {
 		close( fd[1] );
 		int status; wait( &status );
 		close( 0 );
@@ -217,10 +239,8 @@ void more(int controlfd, print_type type, char *host) {
       case PRINTLS:
         ls(); break;
       case PRINTRLS:
-        debugprint("CASE PRINTLS");
-        rls(controlfd, host); break;
       case PRINTSHOW:
-        show(controlfd, host); break;
+        servprint(controlfd, datafd, host); break;
       default:
         debugprint("NO CASE MATCH");
     }
@@ -234,32 +254,10 @@ void ls() {
   execvp(ls_cmd, args);
 }
 
-
-
-void show(int controlfd, char* host) {
-  return;
-}
-
-
-
-
-void rls(int controlfd, char* host) {
-  debugprint("in rls");
+void servprint(int controlfd, int datafd, char* host) {
+  debugprint("in servprint");
   char mesg[CTRL_MSG_SIZE];
-  int datafd, reads;
-  debugprint("creating data connection...");
-
-  if ( (datafd = createdatac(controlfd, host) ) == -1) {
-    printf(E_DATAC);
-    exit(1);
-  }
-
-  strcpy(mesg, "L\n");
-  write(controlfd, mesg, strlen(mesg));
-
-  if(!read_ack(controlfd)){
-    close(datafd); exit(1);
-  }
+  int reads;
 
   while( (reads = read(datafd, mesg, CTRL_MSG_SIZE)) != 0) {
     if ( write(1, mesg, reads) == -1) {

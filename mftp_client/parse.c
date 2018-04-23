@@ -32,6 +32,7 @@ bool checkargs(char *cmdline, int cmd) {
     case RCD:
     case GET:
     case PUT:
+    case SHOW:
       {
         if( !( ptr = strtok(NULL, SPLIT) ) ) {
           printf(E_PATH);
@@ -48,13 +49,10 @@ bool checkargs(char *cmdline, int cmd) {
     case RLS:
       {
         if( (ptr = strtok(NULL, SPLIT))) {
-          if(!strtok(NULL, SPLIT)) {
-            printf(E_MANY);
-            return false;
-          } else return getpath(ptr, cmdline);
+          printf(E_MANY);
+          return false;
         }
         return true;
-        break;
       }
   }
   return false;

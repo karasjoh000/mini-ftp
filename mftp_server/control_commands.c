@@ -13,10 +13,9 @@
 #include <mftp.h>
 #include <netdb.h>
 
-
-
-
 #define BUFSIZE 512
+
+
 
 
 void create_data_connection(int controlfd, DATACON* info) {
@@ -80,6 +79,9 @@ bool changedir(char* path) {
 	return true;
 }
 
+
+
+
 void send_ack(int controlfd, char* str) {
   debugprint("sending ack");
 	char msg[CTRL_MSG_SIZE];
@@ -92,6 +94,8 @@ void send_ack(int controlfd, char* str) {
   debugprint("acknowledgment sent.");
 	return;
 }
+
+
 
 void send_error(int clientfd, error_type type, char* str) {
   debugprint("sending error...");
@@ -115,6 +119,8 @@ void send_error(int clientfd, error_type type, char* str) {
 	}
 }
 
+
+
 void get(int controlfd, int datafd, char* path) {
   if(DEBUG) printf("in getfile\n");
   int filefd = open (path, O_RDONLY, 0);
@@ -130,6 +136,9 @@ void get(int controlfd, int datafd, char* path) {
   }
 }
 
+
+
+
 void put(int controlfd, int datafd, char* path) {
     if(DEBUG) printf("creating file %s...", getname(path));
   	int filefd = open(getname(path), O_RDWR | O_CREAT, 0755);
@@ -143,6 +152,8 @@ void put(int controlfd, int datafd, char* path) {
     }
 }
 
+
+
 int error_format(char* str) {
 	int len = strlen(str) + 1;
 	for( int i = len; i > 0; i-- )
@@ -151,8 +162,9 @@ int error_format(char* str) {
 	return len;
 }
 
+
 void ls(int controlfd, int datafd) {
-  printf("in ls process");
+  debugprint("in ls process");
   send_ack(controlfd, NULL);
   if(fork()) {
     close(datafd);
