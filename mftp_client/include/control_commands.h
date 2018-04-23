@@ -15,11 +15,11 @@ int createdatac(int controlfd, char* host);
 void get(int controlfd, char* path, char* host);
 void put(int controlfd, char* path, char* host);
 void print_error(error_type type, char* str);
-void printcontents(int controlfd, print_type type, char* path);
-void more(int controlfd, print_type type);
+void printcontents(int controlfd, print_type type, char* path, char* host);
+void more(int controlfd, print_type type, char *host);
 bool isError(char* response);
 void ls();
-void show(int controlfd);
-void rls(int controlfd);
+void show(int controlfd, char *host);
+void rls(int controlfd, char *host);
 
 #endif

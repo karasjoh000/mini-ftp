@@ -45,6 +45,7 @@ bool checkargs(char *cmdline, int cmd) {
         break;
       }
     case LS:
+    case RLS:
       {
         if( (ptr = strtok(NULL, SPLIT))) {
           if(!strtok(NULL, SPLIT)) {

@@ -79,7 +79,14 @@ void control_connection(int controlfd) {
 				close(datac.fd);
 				break;
 			default:
+      case 'L':
+        debugprint("CASE L");
+        if (strcmp("L", controlmesg) != 0) goto error;
+        ls(controlfd, datac.io_fd);
+        close(datac.fd);
+        break;
 			error:
+        debugprint("Not valid command");
 				send_error(controlfd, CUST, "Not a valid command\n");
 		}
 	}

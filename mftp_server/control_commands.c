@@ -15,6 +15,7 @@
 
 
 
+
 #define BUFSIZE 512
 
 
@@ -70,6 +71,7 @@ void create_data_connection(int controlfd, DATACON* info) {
 
 bool changedir(char* path) {
 	debugprint("in change dir routine");
+  printf("changing to %s\n", path);
 	if (chdir(path) == -1) {
     if (DEBUG) perror("Failed changing dir");
     return false;
@@ -147,4 +149,19 @@ int error_format(char* str) {
 		str[i] = str[i-1];
 	str[0] = 'E';
 	return len;
+}
+
+void ls(int controlfd, int datafd) {
+  printf("in ls process");
+  send_ack(controlfd, NULL);
+  if(fork()) {
+    close(datafd);
+    int stat; wait(&stat);
+  } else {
+    dup2(datafd, 1);
+    close(datafd);
+    execvp(ls_cmd, ls_args);
+    exit(0);
+  }
+
 }

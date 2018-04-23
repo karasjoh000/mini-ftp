@@ -45,7 +45,11 @@ void program_loop(int controlfd, char* host) {
         break;
       case LS:
         if (checkargs( cmdbuffer, LS))
-          printcontents(controlfd, PRINTLS, NULL);
+          printcontents(controlfd, PRINTLS, NULL, host);
+        break;
+      case RLS:
+        if (checkargs( cmdbuffer, RLS))
+          printcontents(controlfd, PRINTRLS, NULL, host);
         break;
 			default:
         printf("Invalid command\n");

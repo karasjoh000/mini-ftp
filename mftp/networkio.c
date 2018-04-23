@@ -7,7 +7,6 @@
 #include <fcntl.h>
 #include <responses.h>
 
-#define BUFSIZE 512
 
 bool readfromnet(int fd, char *mesg, int buflen) {
 	debugprint("reading from controller");

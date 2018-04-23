@@ -164,7 +164,7 @@ int createdatac(int controlfd, char* host) {
 
 
 
-void printcontents(int controlfd, print_type type, char* path) {
+void printcontents(int controlfd, print_type type, char* path, char* host) {
   int morepipe[2];
   //pipe(morepipe);
   if (fork()) {
@@ -172,19 +172,35 @@ void printcontents(int controlfd, print_type type, char* path) {
     return;
   } else {
     debugprint("In more process");
-    if( path && !cd(path) ) exit(1); //if path provided and cd failed exit.
-    more(controlfd, type);
+    if( path && !cd(path) ) {
+      exit(1); //if path provided and cd failed exit.
+    }
+    more(controlfd, type, host);
   }
+}
+
+bool read_ack(controlfd) {
+  char mesg[CTRL_MSG_SIZE];
+  if(!readfromnet(controlfd, &mesg, CTRL_MSG_SIZE)) {
+      printf(E_ACK);
+      return false;
+  }
+  if(isError(mesg)) {
+    return false;
+  }
+
+  return true;
 }
 
 
 
 
 
-void more(int controlfd, print_type type) {
+void more(int controlfd, print_type type, char *host) {
   int fd[2];
   pipe(fd);
-  if(fork()) {
+  if( fork() ) {
+
 		close( fd[1] );
 		int status; wait( &status );
 		close( 0 );
@@ -201,9 +217,12 @@ void more(int controlfd, print_type type) {
       case PRINTLS:
         ls(); break;
       case PRINTRLS:
-        rls(controlfd); break;
+        debugprint("CASE PRINTLS");
+        rls(controlfd, host); break;
       case PRINTSHOW:
-        show(controlfd); break;
+        show(controlfd, host); break;
+      default:
+        debugprint("NO CASE MATCH");
     }
     exit(1);
   }
@@ -217,13 +236,36 @@ void ls() {
 
 
 
-void show(int controlfd) {
+void show(int controlfd, char* host) {
   return;
 }
 
 
 
 
-void rls(int controlfd) {
-  return;
+void rls(int controlfd, char* host) {
+  debugprint("in rls");
+  char mesg[CTRL_MSG_SIZE];
+  int datafd, reads;
+  debugprint("creating data connection...");
+
+  if ( (datafd = createdatac(controlfd, host) ) == -1) {
+    printf(E_DATAC);
+    exit(1);
+  }
+
+  strcpy(mesg, "L\n");
+  write(controlfd, mesg, strlen(mesg));
+
+  if(!read_ack(controlfd)){
+    close(datafd); exit(1);
+  }
+
+  while( (reads = read(datafd, mesg, CTRL_MSG_SIZE)) != 0) {
+    if ( write(1, mesg, reads) == -1) {
+      perror(E_WR);
+      exit(1);
+    }
+  }
+  exit(0);
 }
