@@ -10,7 +10,7 @@
 #include <responses.h>
 #include <sys/wait.h>
 
-//TODO find why -l not working on ls. 
+//TODO find why -l not working on ls.
 
 const char *ls_cmd;
 const char *ls_args[]; //= {"-l", (void*)NULL};
@@ -185,8 +185,8 @@ bool read_ack(int controlfd) {
 
 
 void printcontents(int controlfd, print_type type, char* path, char* host) {
-  printf("LS ARGS: %s %s\n", ls_args[0], ls_args[1]);
-  printf("MORE ARGS: %s %s\n", more_args[0], more_args[1]);
+  if (DEBUG) printf("LS ARGS: %s %s\n", ls_args[0], ls_args[1]);
+  if (DEBUG) printf("MORE ARGS: %s %s\n", more_args[0], more_args[1]);
   int datafd;
   char mesg[CTRL_MSG_SIZE];
   if ( type == PRINTSHOW || type == PRINTRLS ) {
