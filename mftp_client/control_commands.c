@@ -122,6 +122,13 @@ void put(int controlfd, char* path, char* host) {
     perror(FATAL);
     exit(1);
   }
+
+  if(!readfromnet(controlfd, &mesg, CTRL_MSG_SIZE)) {
+    printf(E_ACK);
+    close(datafd);
+    return;
+  }
+
   if(isError(mesg)) {
     close(datafd);
     return;
@@ -158,7 +165,6 @@ int createdatac(int controlfd, char* host) {
 
 
 void printcontents(int controlfd, print_type type, char* path) {
-  debugprint("in printcontents");
   int morepipe[2];
   //pipe(morepipe);
   if (fork()) {
@@ -205,7 +211,6 @@ void more(int controlfd, print_type type) {
 
 
 void ls() {
-  printf("in ls\n");
   const char *args[] = {"-l", NULL};
   execvp(ls_cmd, args);
 }
