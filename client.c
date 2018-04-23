@@ -19,6 +19,9 @@
 #include <stdbool.h>
 #include <control_commands.h>
 #include <connect.h>
+#include <responses.h>
+
+//TODO catch use case errors.
 
 void program_loop(int controlfd, char* host) {
   char cmdbuffer[CMD_SIZE];
@@ -60,11 +63,13 @@ void program_loop(int controlfd, char* host) {
           quit(controlfd);
         break;
 			default:
-        printf("Invalid command\n");
+        printf(E_INV);
 				break;
 		}
 	}
 }
+
+
 
 int main (int argc, char** argv) {
 

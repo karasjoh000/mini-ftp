@@ -47,7 +47,7 @@ void rcd(int fd, char* path) {
     perror(E_CTRL);
     return;
   }
-	while(!readfromnet(fd, mesg, CTRL_MSG_SIZE)) {
+	while(!readcontroller(fd, mesg, CTRL_MSG_SIZE)) {
 		printf(E_ACK);
     return;
   }
@@ -93,7 +93,7 @@ void get(int controlfd, char* path, char* host) {
     exit(0);
   }
 
-  if(!readfromnet(controlfd, &mesg, CTRL_MSG_SIZE)) {
+  if(!readcontroller(controlfd, &mesg, CTRL_MSG_SIZE)) {
     printf(E_ACK);
     close(datafd);
     return;
@@ -133,7 +133,7 @@ void put(int controlfd, char* path, char* host) {
     exit(1);
   }
 
-  if(!readfromnet(controlfd, &mesg, CTRL_MSG_SIZE)) {
+  if(!readcontroller(controlfd, &mesg, CTRL_MSG_SIZE)) {
     printf(E_ACK);
     close(datafd);
     return;
@@ -162,7 +162,7 @@ int createdatac(int controlfd, char* host) {
       perror(FATAL);
       exit(0);
     }
-    if(!readfromnet(controlfd, &mesg, CTRL_MSG_SIZE)) {
+    if(!readcontroller(controlfd, &mesg, CTRL_MSG_SIZE)) {
       printf(E_ACK);
       return -1;
     }
@@ -173,7 +173,7 @@ int createdatac(int controlfd, char* host) {
 
 bool read_ack(int controlfd) {
   char mesg[CTRL_MSG_SIZE];
-  if(!readfromnet(controlfd, &mesg, CTRL_MSG_SIZE)) {
+  if(!readcontroller(controlfd, &mesg, CTRL_MSG_SIZE)) {
       printf(E_ACK);
       return false;
   }

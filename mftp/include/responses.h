@@ -19,6 +19,7 @@
 #define E_RD      "[ERROR]: read from file failed"
 #define E_LS      "[ERROR]: failed to execute ls"
 #define E_MORE    "[ERROR]: failed to execute more"
+#define E_INV     "[ERROR]: Invalid command\n"
 #define FATAL     "[FATAL ERROR]: Connection broken, exiting."
 
 

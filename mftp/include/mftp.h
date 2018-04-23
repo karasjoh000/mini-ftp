@@ -13,7 +13,7 @@ extern const char *more_cmd;
 extern const char *more_args[];
 
 
-bool readfromnet(int fd, char *mesg, int buflen);
+bool readcontroller(int fd, char *mesg, int buflen);
 char* getname(char *path); //get name from path.
 bool chuckfile(int datafd, int filefd);
 bool catchfile(int datafd, int filefd);

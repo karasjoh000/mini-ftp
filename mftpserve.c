@@ -46,7 +46,7 @@ void control_connection(int controlfd) {
 	while (true) {
 		char controlmesg[CTRL_MSG_SIZE];
 		debugprint("waiting for client input");
-		while( !readfromnet(controlfd, controlmesg, CTRL_MSG_SIZE) )
+		while( !readcontroller(controlfd, controlmesg, CTRL_MSG_SIZE) )
 			send_error(controlfd, CUST, "Command to big");
 		debugprint("client input recieved");
 		switch (controlmesg[0]) {

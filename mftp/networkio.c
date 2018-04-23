@@ -8,7 +8,7 @@
 #include <responses.h>
 
 
-bool readfromnet(int fd, char *mesg, int buflen) {
+bool readcontroller(int fd, char *mesg, int buflen) {
 	debugprint("reading from controller");
 	char buffer;
 	mesg[0] = '\0';
