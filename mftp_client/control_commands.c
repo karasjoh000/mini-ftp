@@ -10,8 +10,6 @@
 #include <responses.h>
 #include <sys/wait.h>
 
-//TODO find why -l not working on ls.
-
 const char *ls_cmd;
 char *const ls_args[]; //= {"-l", (void*)NULL};
 
@@ -248,8 +246,7 @@ void more(int controlfd, int datafd, print_type type, char *path, char *host) {
 
 
 void ls() {
-  const char *args[] = {"-l", NULL};
-  execvp(ls_cmd, args);
+  execvp(ls_cmd, ls_args);
   printf("Failed to execute ls\n");
   exit(2);
 }
