@@ -24,14 +24,15 @@
 #include <responses.h>
 
 //TODO catch use case errors.
-//TODO client ls does not work. More not kicking in.
-//TODO ls command not showing hidden files.
+//TODO close datafd and controlfd for catch and chucke files. 
+
 
 void program_loop( int controlfd, char* host ) {
   char cmdbuffer[CMD_SIZE];
   while( true ) {
     printf( "[mftp]:" );
     fgets( cmdbuffer, CMD_SIZE, stdin );
+    removewhitespace(cmdbuffer);
     if ( DEBUG ) printf( "read %s", cmdbuffer );
     switch( hash( strtok( cmdbuffer, SPLIT ) ) ) {
     case RCD:

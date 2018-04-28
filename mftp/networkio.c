@@ -7,6 +7,11 @@
 #include <fcntl.h>
 #include <responses.h>
 
+void quitwitherror() {
+        printf("[PROCESS %d]:", getpid());
+        perror( FATAL );
+        exit( 1 );
+}
 
 bool readcontroller( int fd, char *mesg, int buflen ) {
   debugprint( "reading from controller" );
@@ -14,10 +19,7 @@ bool readcontroller( int fd, char *mesg, int buflen ) {
   mesg[0] = '\0';
   int reads;
   while ( ( reads = read( fd, &buffer, 1 ) ) != 0 ) {
-    if ( reads < 0 ) {
-      perror( FATAL );
-      exit( 0 );
-    }
+    if ( reads < 0 ) quitwitherror();
     int length = strlen( mesg );
     if ( buffer == '\n' ) return true;
     if ( DEBUG ) printf( "Controller read:%c\n", buffer );
@@ -26,9 +28,8 @@ bool readcontroller( int fd, char *mesg, int buflen ) {
     mesg[length] = buffer;
     mesg[length + 1] = '\0';
   }
-  perror( FATAL );
-  exit( 0 );
-  //return false;
+  quitwitherror();
+  return false;
 }
 
 char* getname( char *path ) {
@@ -45,20 +46,13 @@ bool chuckfile( int datafd, int filefd ) { //sendfile(sockfd, filefd, NULL, BUFS
   while ( ( reads = read( filefd, buffer, BUFSIZE ) ) != 0 ) {
     if( reads == -1 ) {
       perror( E_RD );
-      close( datafd );
-      close( filefd );
       return false;
     }
     buffer[reads] = '\0';
     if( DEBUG ) printf( "sending %s\n", buffer );
-    if ( write( datafd, buffer, reads ) == -1 ) {
-      perror( FATAL );
-      exit( 0 );
-    }
+    if ( write( datafd, buffer, reads ) == -1 ) quitwitherror();
   }
   debugprint( "file sent" );
-  close( filefd );
-  close( datafd );
   return true;
 }
 
@@ -67,10 +61,7 @@ bool catchfile( int datafd, int filefd ) {
   int reads;
   debugprint( "reading from network" );
   while ( ( reads = read( datafd, buffer, 512 ) ) != 0 ) {
-    if ( reads == -1 ) {
-      perror( FATAL );
-      exit( 1 );
-    }
+    if ( reads == -1 ) quitwitherror();
     buffer[reads] = '\0';
     if ( DEBUG ) printf( "data connection read: %s\n", buffer );
     if ( write( filefd, buffer, reads ) == -1 ) {
@@ -78,7 +69,5 @@ bool catchfile( int datafd, int filefd ) {
       return false;
     }
   }
-  close( filefd );
-  close( datafd );
   return true;
 }

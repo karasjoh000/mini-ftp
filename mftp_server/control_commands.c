@@ -88,10 +88,7 @@ void send_ack( int controlfd, char* str ) {
   char msg[CTRL_MSG_SIZE];
   if ( !str ) strcpy( msg, "A\n" );
   else sprintf( msg, "A%s\n", str );
-  if ( write( controlfd, msg, strlen( msg ) ) == -1 ) {
-    perror( "Fatal error. Connection broken, exiting child server" );
-    exit( 0 );
-  }
+  if ( write( controlfd, msg, strlen( msg ) ) == -1 ) quitwitherror();
   if(SERVER_PRINT) printf("[PROCESS %d]: Sent Ack %s", getpid(), msg);
   debugprint( "acknowledgment sent." );
   return;
@@ -134,10 +131,9 @@ void get( int controlfd, int datafd, char* path ) {
     send_error( controlfd, ERRNO, NULL );
     return;
   } else send_ack( controlfd, NULL );
-  if ( !chuckfile( datafd, filefd ) ) {
-    printf( "[Error]: Connection broken, child server exiting...\n" );
-    exit( 0 );
-  }
+  chuckfile( datafd, filefd );
+  close(datafd);
+  close(filefd);
 }
 
 
@@ -151,10 +147,9 @@ void put( int controlfd, int datafd, char* path ) {
     close( datafd );
     send_error( controlfd, ERRNO, NULL );
   } else send_ack( controlfd, NULL );
-  if ( !catchfile( datafd, filefd ) ) {
-    printf( "[Error]: Connection broken, child server exiting...\n" );
-    exit( 0 );
-  }
+  catchfile( datafd, filefd );
+  close(datafd);
+  close(filefd);
 }
 
 

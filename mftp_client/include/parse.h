@@ -12,4 +12,5 @@
 int hash( char* );
 bool checkargs( char *cmdline, int cmd );
 void stripchar( char* str, char ch );
-bool *getpath( char* path, char* cmdline );
+bool getpath( char* path, char* cmdline );
+void removewhitespace(char* str);

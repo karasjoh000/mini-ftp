@@ -12,7 +12,7 @@ extern char *const ls_args[];
 extern const char *more_cmd;
 extern char *const more_args[];
 
-
+void quitwitherror();
 bool readcontroller( int fd, char *mesg, int buflen );
 char* getname( char *path ); //get name from path.
 bool chuckfile( int datafd, int filefd );

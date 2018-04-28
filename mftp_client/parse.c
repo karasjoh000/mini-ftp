@@ -6,8 +6,19 @@
 #include <responses.h>
 #include <stdbool.h>
 #include <control_commands.h>
+#include <ctype.h>
 
-bool *getpath( char* path, char* cmdline ) {
+void removewhitespace(char* str) {
+    int begofstr, endofstr;
+    for (begofstr = 0; begofstr < strlen(str) && isspace(str[begofstr]); begofstr++);
+    str = &str[begofstr];
+    for (endofstr = strlen(str) - 1; endofstr >= 0 && isspace(str[endofstr]); endofstr--);
+    str[endofstr + 1] = '\0';
+}
+
+bool getpath( char* path, char* cmdline ) {
+
+  //removewhitespace(path);
 
   int plen = strlen( path );
   if ( ( plen = strlen( path ) ) > CTRL_MSG_SIZE - 1 ) {
@@ -17,7 +28,6 @@ bool *getpath( char* path, char* cmdline ) {
   char temp[plen];
   strcpy( temp, path ); //need to make a temp because ptr is pointing inside cmdline buffer
   strcpy( cmdline, temp );
-  stripchar( cmdline, '\n' ); //get rid of the new line.
   return true;
 }
 
@@ -65,7 +75,7 @@ bool checkargs( char *cmdline, int cmd ) {
 
 int hash( char *str ) {
   char format[CMD_SIZE]; //need to make a copy to not screw strtok interator.
-  stripchar( strcpy( format, str ), '\n' );
+  removewhitespace( strcpy( format, str) );
 
   if ( DEBUG ) printf( "hashing %s\n", format );
   if( strcmp( format, "ls"   ) == 0 ) return LS;
