@@ -1,6 +1,6 @@
 #include <pthread.h>
 
-void releaser(void* p);
+void releaser( void* p );
 void killZombies();
 
 extern pthread_cond_t workerReleaser;  // for the thread that kills off
