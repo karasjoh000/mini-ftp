@@ -18,17 +18,6 @@
 #include <errno.h>
 #include <configure_server.h>
 
-
-// Forked process exectues this function, sends date/time to client then exits.
-void serveClient( int netfd ) {
-  char buffer[40];
-  time_t current = time( NULL );
-  strcpy( buffer, ctime( &current ) );
-  write( netfd, buffer, strlen( buffer ) + 1 ); //+1 for null terminator.
-  close( netfd );
-  exit( 0 );
-}
-
 // configures server address (Port, family, and address).
 void setServerAddress( struct sockaddr_in* servAddr, int port ) {
   memset( servAddr, 0, sizeof( *servAddr ) );
@@ -67,5 +56,6 @@ int get_port( int socketfd ) {
     return -1;
   }
 
+  //converts to host byte order before returning.
   return ntohs( childname.sin_port );
 }

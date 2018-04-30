@@ -3,7 +3,7 @@
 
 #define PORT            49999
 #define CTRL_MSG_SIZE   512
-#define DEBUG           0
+#define DEBUG           1
 #define BUFSIZE         512
 
 extern const char *ls_cmd;

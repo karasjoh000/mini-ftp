@@ -53,4 +53,8 @@ void send_error( int clientfd, error_type type, char* str );
 			otherwise '"A\n"'. */
 void send_ack( int controlfd, char* str );
 
+/*void ls( int controlfd, int datafd ) : redirects stdout to datafd and executes
+   			the ls command*/
+void ls( int controlfd, int datafd );
+
 #endif
