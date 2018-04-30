@@ -25,14 +25,15 @@
 #define PORT 49999
 #define CTRL_MSG_SIZE 512 //maximum size for a control command
 
-pthread_cond_t workerReleaser;  // for the thread that kills off
-pthread_mutex_t m_workerReleaser; 				       // zombie processes.
-pthread_t *releaserThread;      // thread that kills zombie processes.
+pthread_cond_t workerReleaser;   // for the thread that kills off
+pthread_mutex_t m_workerReleaser;// zombie processes.
+pthread_t *releaserThread;       // thread that kills zombie processes.
 
 int connectfd;
 
-extern void releaser( void* );
+extern void releaser( void* ); //SEE zombiekiller.c FOR DETAILS.
 
+// IF SIGINT RECEIVED, SHUTDOWN SERVER.
 void shutdownServer( int code ) {
   close( connectfd );
   printf( "\nshutting down server\n" );
@@ -88,6 +89,7 @@ void control_connection( int controlfd ) {
       close( datac.fd );
       break;
     case 'Q':
+      if(SERVER_PRINT) printf("[PROCESS %d]: Exiting...\n", getpid());
       send_ack( controlfd, NULL );
       exit( 0 );
 error:
@@ -105,7 +107,6 @@ int main () {
   signal( SIGINT, shutdownServer );
   // init list of pid's.
   // make a seperate thread that will waitpid WNOHANG on the list of pid's.
-
   pthread_cond_init( &workerReleaser, NULL );
   pthread_mutex_init( &m_workerReleaser, NULL );
   releaserThread = ( pthread_t* ) malloc( sizeof( pthread_t ) );
@@ -117,7 +118,7 @@ int main () {
 
   struct sockaddr_in servAddr;
 
-  setServerAddress( &servAddr, PORT ); //set address, port, and add. family.
+  setServerAddress( &servAddr, PORT );      //set address, port, and add. family.
   bindNameToSocket( listenfd, &servAddr ); // bind address to socket.
 
   // set queue limit for incoming connections
@@ -135,6 +136,7 @@ int main () {
 
     printf( "[SERVER %d]: listening on port %d\n",getpid(), PORT );
 
+    //ACCEPT CONNECTION FROM CLIENT
     if ( ( connectfd = accept( listenfd, ( struct sockaddr * ) &clientAddr,
                                &length ) ) == -1 )
       errx( 1, "error connecting: %s", strerror( errno ) );

@@ -82,6 +82,7 @@ void get( int controlfd, char* path, char* host ) {
   debugprint( "creating data connection..." );
   if ( ( datafd = createdatac( controlfd, host ) ) == -1 ) {
     printf( E_DATAC );
+    close(filefd);
     return;
   }
   debugprint( "[SUCCESS]: Data connection created" );
@@ -96,16 +97,19 @@ void get( int controlfd, char* path, char* host ) {
   if( !readcontroller( controlfd, &mesg, CTRL_MSG_SIZE ) ) {
     printf( E_ACK );
     close( datafd );
+    close(filefd);
     return;
   }
 
   if( isError( mesg ) ) {
     close( datafd );
+    close(filefd);
     return;
   }
 
-  if ( !catchfile( datafd, filefd ) )
-    return;
+  catchfile( datafd, filefd );
+  close(datafd);
+  close(filefd);
 }
 
 
@@ -144,9 +148,9 @@ void put( int controlfd, char* path, char* host ) {
     return;
   }
 
-  if( !chuckfile( datafd, filefd ) ) {
-    return;
-  }
+  chuckfile( datafd, filefd );
+  close(datafd);
+  close(filefd);
   debugprint( "[SUCCESS]: File sent to server" );
 
 }
@@ -182,14 +186,12 @@ bool read_ack( int controlfd ) {
 
 
 void printcontents( int controlfd, print_type type, char* path, char* host ) {
-  if ( DEBUG ) printf( "LS ARGS: %s %s\n", ls_args[0], ls_args[1] );
-  if ( DEBUG ) printf( "MORE ARGS: %s %s\n", more_args[0], more_args[1] );
   int datafd;
   char mesg[CTRL_MSG_SIZE];
   if ( type == PRINTSHOW || type == PRINTRLS ) {
     if ( ( datafd = createdatac( controlfd, host ) ) == -1 ) {
       printf( E_DATAC );
-      exit( 1 );
+      return;
     }
     switch ( type ) {
     case PRINTRLS:
@@ -206,7 +208,7 @@ void printcontents( int controlfd, print_type type, char* path, char* host ) {
     if( !read_ack( controlfd ) ) {
       printf( E_ACK );
       close( datafd );
-      exit( 1 );
+      return;
     }
 
   }

@@ -5,7 +5,6 @@
 #define SERVER_PRINT 1
 
 /* ERROR STATMENTS USED ON CLIENT SIDE */
-/* SORRY, NO OPTION FOR THIS ONE */
 #define E_BIG       "[ERROR]: Path to big.\n"
 #define E_PATH      "[ERROR]: Please provide a path\n"
 #define E_MANY      "[ERROR]: To many arguments\n"
@@ -21,7 +20,7 @@
 #define E_MORE      "[ERROR]: failed to execute more"
 #define E_INV       "[ERROR]: Invalid command\n"
 #define FATAL       "[FATAL ERROR]: Connection broken, exiting."
-#define E_CHLD      "[ERROR ON PROCESS %d]: Sent E%s\n"
+
 
 
 #endif

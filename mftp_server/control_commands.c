@@ -17,10 +17,9 @@
 #define BUFSIZE 512
 
 
-
-
 void create_data_connection( int controlfd, DATACON* info ) {
   debugprint( "creating new socket....." );
+  if(SERVER_PRINT) printf("[PROCESS %d]: Creating data connection\n", getpid());
   info->fd = socket( AF_INET, SOCK_STREAM, 0 );
   if ( info->fd == -1 ) {
     send_error( controlfd, ERRNO, NULL );
@@ -90,7 +89,6 @@ void send_ack( int controlfd, char* str ) {
   else sprintf( msg, "A%s\n", str );
   if ( write( controlfd, msg, strlen( msg ) ) == -1 ) quitwitherror();
   if(SERVER_PRINT) printf("[PROCESS %d]: Sent Ack %s", getpid(), msg);
-  debugprint( "acknowledgment sent." );
   return;
 }
 
@@ -101,22 +99,20 @@ void send_error( int clientfd, error_type type, char* str ) {
   char mesg[CTRL_MSG_SIZE];
   switch ( type ) {
   case ERRNO:
-    debugprint( "In errno case" );
     sprintf( mesg, "E%s\n", strerror( errno ) );
-    if ( write( clientfd, mesg, strlen( mesg ) ) == -1 ) {
-      if ( DEBUG ) perror( "Connection broken, child server exiting" );
-      exit( 0 );
-    }
-    if(SERVER_PRINT) printf(E_CHLD, getpid(), strerror(errno));
-    debugprint( "error sent" );
     break;
   case HERRNO:
     sprintf( mesg, "E%s\n", hstrerror( h_errno ) );
-    if ( write( clientfd, mesg, strlen( mesg ) ) == -1 ) exit( 0 );
+    break;
+  case CUST:
+    sprintf(mesg, "E%s\n", str);
     break;
   default:
-    if ( write( clientfd, str, error_format( str ) ) == -1 ) exit( 0 );
+    return;
   }
+  if ( write( clientfd, mesg, strlen( mesg ) ) == -1 ) quitwitherror();
+  if (SERVER_PRINT) printf("[PROCESS %d]: Sent error %s", getpid(), mesg);
+
 }
 
 
@@ -141,7 +137,7 @@ void get( int controlfd, int datafd, char* path ) {
 
 void put( int controlfd, int datafd, char* path ) {
   if( DEBUG ) printf( "creating file %s...", getname( path ) );
-  if( SERVER_PRINT ) printf("[PROCESS %d]: creating file %s for reading\n", getpid(), path);
+  if( SERVER_PRINT ) printf("[PROCESS %d]: creating file %s for writing\n", getpid(), path);
   int filefd = open( getname( path ), O_RDWR | O_CREAT, 0755 );
   if ( filefd == -1 ) {
     close( datafd );
@@ -164,6 +160,7 @@ int error_format( char* str ) {
 
 
 void ls( int controlfd, int datafd ) {
+  printf("[PROCESS %d]: executing ls\n", getpid());
   debugprint( "in ls process" );
   send_ack( controlfd, NULL );
   if( fork() ) {

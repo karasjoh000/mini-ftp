@@ -18,8 +18,6 @@ void removewhitespace(char* str) {
 
 bool getpath( char* path, char* cmdline ) {
 
-  //removewhitespace(path);
-
   int plen = strlen( path );
   if ( ( plen = strlen( path ) ) > CTRL_MSG_SIZE - 1 ) {
     printf( E_BIG );
@@ -45,28 +43,28 @@ bool checkargs( char *cmdline, int cmd ) {
   case GET:
   case PUT:
   case SHOW:
-  {
-    if( !( ptr = strtok( NULL, SPLIT ) ) ) {
-      printf( E_PATH );
-      return false;
+    {
+      if( !( ptr = strtok( NULL, SPLIT ) ) ) {
+        printf( E_PATH );
+        return false;
+      }
+      if ( strtok( NULL, SPLIT ) ) {
+        printf( E_MANY );
+        return false;
+      }
+      return getpath( ptr, cmdline );
+      break;
     }
-    if ( strtok( NULL, SPLIT ) ) {
-      printf( E_MANY );
-      return false;
-    }
-    return getpath( ptr, cmdline );
-    break;
-  }
   case LS:
   case RLS:
   case EXIT:
-  {
-    if( ( ptr = strtok( NULL, SPLIT ) ) ) {
-      printf( E_MANY );
-      return false;
+    {
+      if( ( ptr = strtok( NULL, SPLIT ) ) ) {
+        printf( E_MANY );
+        return false;
+      }
+      return true;
     }
-    return true;
-  }
   }
   return false;
 }
@@ -78,11 +76,11 @@ int hash( char *str ) {
   removewhitespace( strcpy( format, str) );
 
   if ( DEBUG ) printf( "hashing %s\n", format );
-  if( strcmp( format, "ls"   ) == 0 ) return LS;
-  if( strcmp( format, "rcd"  ) == 0 ) return RCD;
-  if( strcmp( format, "rls"  ) == 0 ) return RLS;
-  if( strcmp( format, "cd"   ) == 0 ) return CD;
-  if( strcmp( format, "get"  ) == 0 ) return GET;
+  if( strcmp( format, "ls"   )  == 0 ) return LS;
+  if( strcmp( format, "rcd"  )  == 0 ) return RCD;
+  if( strcmp( format, "rls"  )  == 0 ) return RLS;
+  if( strcmp( format, "cd"   )  == 0 ) return CD;
+  if( strcmp( format, "get"  )  == 0 ) return GET;
   if( strcmp( format,  "put"  ) == 0 ) return PUT;
   if( strcmp( format,  "show" ) == 0 ) return SHOW;
   if( strcmp( format,  "exit" ) == 0 ) return EXIT;

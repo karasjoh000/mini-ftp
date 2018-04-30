@@ -24,7 +24,7 @@
 #include <responses.h>
 
 //TODO catch use case errors.
-//TODO close datafd and controlfd for catch and chucke files. 
+//TODO close datafd and controlfd for catch and chucke files.
 
 
 void program_loop( int controlfd, char* host ) {
@@ -88,6 +88,8 @@ int main ( int argc, char** argv ) {
   if ( controlfd == -1 ) return 0;
 
   debugprint( "got controlfd client" );
+
+  printf("[SUCCESS]: Connected to port %d on server\n", PORT);
 
   program_loop( controlfd, argv[1] );
 
