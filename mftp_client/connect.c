@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <connect.h>
 
+/* configures the connection address that client will connect to. */
 void setConnectionAddress( struct sockaddr_in *servAddr, struct hostent* host, int port ) {
   // set to 0 to avoid unwanted configurations.
   memset( ( struct servAddr* ) servAddr, 0, sizeof( servAddr ) );
