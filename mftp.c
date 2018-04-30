@@ -32,9 +32,11 @@ void program_loop( int controlfd, char* host ) {
   while( true ) {
     printf( "[mftp]:" );
     fgets( cmdbuffer, CMD_SIZE, stdin );
-    removewhitespace(cmdbuffer);
+    removewhitespace(cmdbuffer); //remove uneeded whitespaces.
     if ( DEBUG ) printf( "read %s", cmdbuffer );
+    //hash the command.
     switch( hash( strtok( cmdbuffer, SPLIT ) ) ) {
+    /*for each command check args then call the cmd subroutine. */
     case RCD:
       if( checkargs( cmdbuffer, RCD ) )
         rcd( controlfd, cmdbuffer );
@@ -67,7 +69,7 @@ void program_loop( int controlfd, char* host ) {
       if ( checkargs( cmdbuffer, EXIT ) )
         quit( controlfd );
       break;
-    default:
+    default:  // if no case match print invalid args error.
       printf( E_INV );
       break;
     }
@@ -79,11 +81,13 @@ void program_loop( int controlfd, char* host ) {
 int main ( int argc, char** argv ) {
 
   debugprint( "in client" );
+  //make sure a hostname is provided. 
   if( argc == 1 )
     errx( 0, "please provide a hostname in arguments" );
 
   if( DEBUG ) printf( "Attempting to connect to port: %d\n", PORT );
 
+  //connect to server.
   int controlfd = create_connection( argv[1], PORT );
   if ( controlfd == -1 ) return 0;
 
@@ -91,6 +95,7 @@ int main ( int argc, char** argv ) {
 
   printf("[SUCCESS]: Connected to port %d on server\n", PORT);
 
+  //goto the main program loop.
   program_loop( controlfd, argv[1] );
 
   return 0;

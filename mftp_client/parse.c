@@ -10,8 +10,10 @@
 
 void removewhitespace(char* str) {
     int begofstr, endofstr;
+    //remove leading whitespaces.
     for (begofstr = 0; begofstr < strlen(str) && isspace(str[begofstr]); begofstr++);
     str = &str[begofstr];
+    //remove trailing whitespaces.
     for (endofstr = strlen(str) - 1; endofstr >= 0 && isspace(str[endofstr]); endofstr--);
     str[endofstr + 1] = '\0';
 }
@@ -19,8 +21,8 @@ void removewhitespace(char* str) {
 bool getpath( char* path, char* cmdline ) {
 
   int plen = strlen( path );
-  if ( ( plen = strlen( path ) ) > CTRL_MSG_SIZE - 1 ) {
-    printf( E_BIG );
+  if ( ( plen = strlen( path ) ) > CTRL_MSG_SIZE - 1 ) { //if path bigger than
+    printf( E_BIG );                                     // control connection limit, return false.
     return false;
   }
   char temp[plen];
@@ -29,11 +31,6 @@ bool getpath( char* path, char* cmdline ) {
   return true;
 }
 
-void stripchar( char* str, char ch ) {
-  char *pch; //get rid of the last newline
-  if( ( pch = strrchr( str, ch ) ) ) * pch = '\0';
-  return;
-}
 
 bool checkargs( char *cmdline, int cmd ) {
   char* ptr;
@@ -43,21 +40,23 @@ bool checkargs( char *cmdline, int cmd ) {
   case GET:
   case PUT:
   case SHOW:
+  /*For these commands make sure there is a path and no other arguements*/
     {
       if( !( ptr = strtok( NULL, SPLIT ) ) ) {
-        printf( E_PATH );
+        printf( E_PATH ); //return false if no path provided.
         return false;
       }
       if ( strtok( NULL, SPLIT ) ) {
-        printf( E_MANY );
+        printf( E_MANY ); //return false if too many arguements
         return false;
       }
-      return getpath( ptr, cmdline );
+      return getpath( ptr, cmdline ); //copy path to cmdline.
       break;
     }
   case LS:
   case RLS:
   case EXIT:
+  /*For these commands make sure no arguements are provided besides the command. */
     {
       if( ( ptr = strtok( NULL, SPLIT ) ) ) {
         printf( E_MANY );
@@ -76,6 +75,7 @@ int hash( char *str ) {
   removewhitespace( strcpy( format, str) );
 
   if ( DEBUG ) printf( "hashing %s\n", format );
+  // return the command hash. 
   if( strcmp( format, "ls"   )  == 0 ) return LS;
   if( strcmp( format, "rcd"  )  == 0 ) return RCD;
   if( strcmp( format, "rls"  )  == 0 ) return RLS;

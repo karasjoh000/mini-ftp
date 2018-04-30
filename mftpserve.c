@@ -48,10 +48,12 @@ void control_connection( int controlfd ) {
   while ( true ) {
     char controlmesg[CTRL_MSG_SIZE];
     debugprint( "waiting for client input" );
+    //if cannot read from control connection, buffer overflow is assumed.
     while( !readcontroller( controlfd, controlmesg, CTRL_MSG_SIZE ) )
       send_error( controlfd, CUST, "Command to big" );
     debugprint( "client input recieved" );
     switch ( controlmesg[0] ) {
+    /*For each case make sure command is in the right format then call cmd function. */
     case 'D':
       debugprint( "CASE D" );
       if ( strcmp( controlmesg, "D" ) != 0 )

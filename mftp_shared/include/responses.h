@@ -1,10 +1,10 @@
 #ifndef ERRORS_H
 #define ERRORS_H
 
-/* PRINT SUCCESS OR NOT ? */
-#define SERVER_PRINT 1
 
-/* ERROR STATMENTS USED ON CLIENT SIDE */
+#define SERVER_PRINT 1 //PRINT INFO ON SERVER SIDE OR NOT?
+
+/* ERROR STATMENTS */
 #define E_BIG       "[ERROR]: Path to big.\n"
 #define E_PATH      "[ERROR]: Please provide a path\n"
 #define E_MANY      "[ERROR]: To many arguments\n"

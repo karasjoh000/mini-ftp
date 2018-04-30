@@ -73,6 +73,6 @@ void ls();
 /*void servprint( int controlfd, int datafd, char* host ) : Reads contents on
 			datafd and prints them to stdout. This will be redirected
 			to the more process. */
-void servprint( int controlfd, int datafd, char* host );
+void servprint( int controlfd, int datafd);
 
 #endif
