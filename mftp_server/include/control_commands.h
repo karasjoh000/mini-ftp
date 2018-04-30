@@ -48,9 +48,9 @@ void put( int controlfd, int datafd, char* path );
 			strings before sending. */
 void send_error( int clientfd, error_type type, char* str );
 
-
-int error_format( char* );
-
+/*void send_ack( int controlfd, char* str ) : sends acknowledgment to client.
+			If str is not NULL it sends '"A%s\n", str'
+			otherwise '"A\n"'. */
 void send_ack( int controlfd, char* str );
 
 #endif

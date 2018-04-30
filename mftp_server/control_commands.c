@@ -150,15 +150,6 @@ void put( int controlfd, int datafd, char* path ) {
 
 
 
-int error_format( char* str ) {
-  int len = strlen( str ) + 1;
-  for( int i = len; i > 0; i-- )
-    str[i] = str[i - 1];
-  str[0] = 'E';
-  return len;
-}
-
-
 void ls( int controlfd, int datafd ) {
   printf("[PROCESS %d]: executing ls\n", getpid());
   debugprint( "in ls process" );
