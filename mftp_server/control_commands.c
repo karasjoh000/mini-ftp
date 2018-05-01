@@ -143,7 +143,7 @@ void get( int controlfd, int datafd, char* path ) {
 void put( int controlfd, int datafd, char* path ) {
   if( DEBUG ) printf( "creating file %s...", getname( path ) );
   if( SERVER_PRINT ) printf("[PROCESS %d]: creating file %s for writing\n", getpid(), path);
-  int filefd = open( getname( path ), O_RDWR | O_CREAT, 0755 );
+  int filefd = open( getname( path ), O_RDWR | O_CREAT | O_TRUNC , 0755 );
   if ( filefd == -1 ) {
     close( datafd );
     send_error( controlfd, ERRNO, NULL );
