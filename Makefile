@@ -1,10 +1,12 @@
+TARFILE=JohnKarasevCS360Final
 OBJ=./objects
 SERVER=mftp_server
 CLIENT=mftp_client
 SHARED=mftp_shared
 LIB=-lpthread
-SCFLAGS=-c -std=c99 -Wall -pedantic -I$(SERVER)/include -I$(SHARED)/include
-CCFLAGS=-c -std=c99 -Wall -pedantic -I$(CLIENT)/include -I$(SHARED)/include
+#-Wall -pedantic
+SCFLAGS=-c -std=c99 -I$(SERVER)/include -I$(SHARED)/include
+CCFLAGS=-c -std=c99 -I$(CLIENT)/include -I$(SHARED)/include
 mftpserve: $(OBJ) $(OBJ)/mftpserve.o $(OBJ)/execvp_args.o $(OBJ)/networkio.o $(OBJ)/debug.o $(OBJ)/configure_server.o $(OBJ)/zombiekiller.o $(OBJ)/control_commands.o mftp
 	gcc  $(OBJ)/mftpserve.o $(OBJ)/execvp_args.o $(OBJ)/networkio.o $(OBJ)/debug.o $(OBJ)/configure_server.o $(OBJ)/zombiekiller.o $(OBJ)/control_commands.o -o mftpserve $(LIB)
 mftp: $(OBJ) $(OBJ)/mftp.o $(OBJ)/execvp_args.o $(OBJ)/debug.o $(OBJ)/connect.o $(OBJ)/networkio.o $(OBJ)/c_control_commands.o $(OBJ)/parse.o
@@ -34,4 +36,8 @@ $(OBJ)/execvp_args.o: $(SHARED)/execvp_args.c
 $(OBJ):
 	mkdir $(OBJ)
 clean:
-	rm -rf $(OBJ) mftpserve && rm mftp
+	rm -rf $(OBJ) mftpserve && rm mftp *.tar.gz
+tar:
+	mkdir $(TARFILE) && cp -r $(SHARED) $(CLIENT) $(SERVER) mftpserve.c mftp.c README.txt *.pdf Makefile ./$(TARFILE)
+	tar cvf $(TARFILE).tar $(TARFILE) && rm -rf $(TARFILE)
+	gzip $(TARFILE).tar

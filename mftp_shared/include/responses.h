@@ -1,5 +1,5 @@
-#ifndef ERRORS_H
-#define ERRORS_H
+#ifndef RESPONSES_H
+#define RESPONSES_H
 
 
 #define SERVER_PRINT 1 //PRINT INFO ON SERVER SIDE OR NOT?

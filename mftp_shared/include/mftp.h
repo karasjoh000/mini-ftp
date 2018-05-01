@@ -1,3 +1,6 @@
+#ifndef MFTP_H
+#define MFTP_H
+
 #include <stdbool.h>
 #include <stdlib.h>
 
@@ -38,3 +41,5 @@ bool catchfile( int datafd, int filefd );
 /*void debugprint( char* str ) : prints str with newline at end if DEBUG flag is
 			set. */
 void debugprint( char* str );
+
+#endif
