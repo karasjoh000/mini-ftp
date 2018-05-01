@@ -88,7 +88,7 @@ int main ( int argc, char** argv ) {
   if( DEBUG ) printf( "Attempting to connect to port: %d\n", PORT );
 
   //connect to server.
-  int controlfd = create_connection( argv[1], PORT );
+  int controlfd = create_connection( argv[1], PORT, true );
   if ( controlfd == -1 ) return 0;
 
   debugprint( "got controlfd client" );

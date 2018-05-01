@@ -7,6 +7,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <connect.h>
+#include <stdbool.h>
 
 /* configures the connection address that client will connect to. */
 void setConnectionAddress( struct sockaddr_in *servAddr, struct hostent* host, int port ) {
@@ -19,7 +20,21 @@ void setConnectionAddress( struct sockaddr_in *servAddr, struct hostent* host, i
 
 }
 
-int create_connection( char* host, int port ) {
+void print_connection_details(struct hostent* hostEntry, struct sockaddr_in *servAddr) {
+    //get ip address of server
+    char serverip[INET_ADDRSTRLEN];
+    if ( ( inet_ntop( AF_INET, &(servAddr->sin_addr),
+                        serverip, INET_ADDRSTRLEN ) ) == NULL )
+      strcpy(serverip, "unknown");
+
+    //print connection details to stdout.
+    if ( !hostEntry )
+      printf( " Connected to [name: unknown][ip: %s] on port \n", serverip );
+    printf( "Connected to [name: %s][ip: %s]\n", hostEntry->h_name, serverip );
+
+}
+
+int create_connection( char* host, int port, bool printinfo) {
 
   int socketfd = socket( AF_INET, SOCK_STREAM, 0 ); // get a socket fd.
   struct sockaddr_in servAddr;
@@ -38,16 +53,7 @@ int create_connection( char* host, int port ) {
     return -1;
   }
 
-  //get ip address of server
-  char serverip[INET_ADDRSTRLEN];
-  if ( ( inet_ntop( AF_INET, &servAddr.sin_addr,
-                      serverip, INET_ADDRSTRLEN ) ) == NULL )
-    strcpy(serverip, "unknown");
-
-  //print connection details to stdout. 
-  if ( !hostEntry )
-    printf( " Connected to [name: unknown][ip: %s] on port \n", serverip );
-  printf( "Connected to [name: %s][ip: %s]\n", hostEntry->h_name, serverip );
+  if(printinfo) print_connection_details(hostEntry, &servAddr);
 
   return socketfd;
 }

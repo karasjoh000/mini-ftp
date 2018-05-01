@@ -157,7 +157,7 @@ int createdatac( int controlfd, char* host ) {
 
   int port; //read port # from message return -1 if error parsing.
   if ( sscanf( mesg, "A%d", &port ) != 1 ) return -1;
-  return create_connection( host, port ); //return data connection fd.
+  return create_connection( host, port, false ); //return data connection fd.
 
 }
 
