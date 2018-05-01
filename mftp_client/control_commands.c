@@ -84,7 +84,7 @@ void get( int controlfd, char* path, char* host ) {
 
     //try to open the file in path, return if error.
   if( DEBUG ) printf( "creating %s...\n", path );
-  int filefd = open ( getname( path ), O_RDWR | O_CREAT, 0755 );
+  int filefd = open ( getname( path ), O_RDWR | O_CREAT | O_TRUNC, 0755 );
   if ( filefd == -1 ) {
     close( datafd );
     perror( E_OPEN );
