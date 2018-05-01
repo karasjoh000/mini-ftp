@@ -25,8 +25,10 @@ int create_connection( char* host, int port ) {
   struct sockaddr_in servAddr;
   struct hostent* hostEntry;
 
-  if ( ( hostEntry = gethostbyname( host ) ) == NULL )  // get struct with host info.
+  if ( ( hostEntry = gethostbyname( host ) ) == NULL ) { // get struct with host info.
     printf( "no name associated with %s\n", host );
+    exit(1);
+  }
 
   setConnectionAddress( &servAddr, hostEntry, port );
 
@@ -35,6 +37,17 @@ int create_connection( char* host, int port ) {
     perror( "Error on connect" );
     return -1;
   }
+
+  //get ip address of server
+  char serverip[INET_ADDRSTRLEN];
+  if ( ( inet_ntop( AF_INET, &servAddr.sin_addr,
+                      serverip, INET_ADDRSTRLEN ) ) == NULL )
+    strcpy(serverip, "unknown");
+
+  //print connection details to stdout. 
+  if ( !hostEntry )
+    printf( " Connected to [name: unknown][ip: %s] on port \n", serverip );
+  printf( "Connected to [name: %s][ip: %s]\n", hostEntry->h_name, serverip );
 
   return socketfd;
 }

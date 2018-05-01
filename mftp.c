@@ -81,7 +81,7 @@ void program_loop( int controlfd, char* host ) {
 int main ( int argc, char** argv ) {
 
   debugprint( "in client" );
-  //make sure a hostname is provided. 
+  //make sure a hostname is provided.
   if( argc == 1 )
     errx( 0, "please provide a hostname in arguments" );
 
@@ -92,8 +92,6 @@ int main ( int argc, char** argv ) {
   if ( controlfd == -1 ) return 0;
 
   debugprint( "got controlfd client" );
-
-  printf("[SUCCESS]: Connected to port %d on server\n", PORT);
 
   //goto the main program loop.
   program_loop( controlfd, argv[1] );
