@@ -10,10 +10,12 @@ Description:
 Program structure:
 
 CS360_final
+│
 ├── Makefile                    # makefile
 ├── README.txt                  # this file
 ├── mftp.c			# client main function
 ├── mftpserve.c                 # server main function
+│
 ├── mftp_client
 │   ├── connect.c               # functions to create connections with server
 │   ├── control_commands.c      # functions for control connection
