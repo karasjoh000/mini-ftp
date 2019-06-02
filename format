@@ -1,1 +1,0 @@
-astyle -p -D -t --indent=spaces=2 --recursive "./*.c,*.h"
